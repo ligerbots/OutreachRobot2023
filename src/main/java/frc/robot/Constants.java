@@ -13,6 +13,16 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  // Shooter SPARK MAXES
+  public static final int SHOOTER_ONE_ID = 5; // Motor 1 on shooter
+  public static final int SHOOTER_TWO_ID = 6; // Motor 2 on shooter
+  public static final int SHOOTER_FLUP_ID = 8; // Carousel to shooter wheel "FLUP"
+  public static final int SHOOTER_SERVO_PWM_ID = 0; // Servo to control hood angle 
+  public static final int SHOOTER_TURRET_SERVO_ID = 1; // TODO: Fix this
+  public static final double TURRET_ANGLE_ZERO_SETTING = 135.0;
+  public static final double TURRET_ANGLE_COEFFICIENT = 180; // TODO: Fix this
+  public static final double WARM_UP_RPM = 3000; // TODO: find a good value
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
