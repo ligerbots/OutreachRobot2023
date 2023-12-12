@@ -36,6 +36,15 @@ public class turret extends TrapezoidProfileSubsystem {
   // Gear ratio for robot
   static final double inputToOutputRatio = 1/162.5;
 
+/* Turret design outline:
+ * If 
+ * 
+ * 
+*/
+
+  //the angle it can not pass otherwise it will tare the wires off the robot UPDATE with robot
+  static final double angleLimit = Math.toRadians(3);
+
   /** Creates a new NEOMotor. 
    * @param MOTOR_CAN_ID */
   public turret(int MOTOR_CAN_ID) {
