@@ -5,22 +5,23 @@
 package frc.robot.subsystems;
 
 
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import frc.robot.Constants;
 
 
 
+
 public class Intake extends SubsystemBase {
-  SparkMax intakeMotor;
+  CANSparkMax intakeMotor;
   /** Creates a new Intake. */
   
   public Intake() {
-    intakeMotor = new SparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
-    intakeMotor.setIdleMode(IdleMode.kBrake);
+    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
+    intakeMotor.setIdleMode(IdleMode.kBrake);   
   }
 
   @Override
