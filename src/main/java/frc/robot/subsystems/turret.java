@@ -35,6 +35,8 @@ public class turret extends TrapezoidProfileSubsystem {
 
   // Gear ratio for robot
   static final double inputToOutputRatio = 1/162.5;
+  //The offset for the turret. This in the end should be auto set with a limit switch
+  static double turretOffset = Math.toRadians(0);
 
 /* Turret design outline:
  * If 
@@ -75,6 +77,7 @@ public class turret extends TrapezoidProfileSubsystem {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("encoderReading", Math.toDegrees(getAngle()));
+    SmartDashboard.putNumber("turretOffsetInRadians", getAngle());
   }
 
   public double getAngle(){
@@ -87,6 +90,22 @@ public class turret extends TrapezoidProfileSubsystem {
 
   public void setAngle(double angle){
     m_PIDController.setReference(angle, ControlType.kPosition, 0, K_FF); 
+
+  }
+
+  /** Turns the turret. 
+   * @param angle - must be bewteen 0 and 360 */
+  public void setTurretAngle(double angle){
+    if (angle >= 0 && angle <= 360) {
+      setAngle(getAngle()-turretOffset);
+    }
+  }
+
+  /** 
+   * @return the value you need to put in the turretOffset varable in Radians
+  */
+  public double getTurretOffsetAngleWhileAtZero() {
+    return getAngle();
   }
 
   @Override
