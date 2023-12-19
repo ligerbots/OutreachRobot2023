@@ -13,8 +13,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
+import frc.robot.commands.TurnTurret;
 
 public class turret extends TrapezoidProfileSubsystem {
   private final CANSparkMax m_motor;
@@ -84,11 +86,11 @@ public class turret extends TrapezoidProfileSubsystem {
     return m_encoder.getPosition();
   }
 
-  public void setSpeed(double speed){
+  private void setSpeed(double speed){
     m_motor.set(speed);
   }
 
-  public void setAngle(double angle){
+  private void setAngle(double angle){
     m_PIDController.setReference(angle, ControlType.kPosition, 0, K_FF); 
 
   }
@@ -98,6 +100,26 @@ public class turret extends TrapezoidProfileSubsystem {
   public void setTurretAngle(double angle){
     if (angle >= 0 && angle <= 360) {
       setAngle(getAngle()-turretOffset);
+    }
+  }
+
+
+  //REPLACE PITCH AND YAW WITH BACK AND FORTH
+  /** Converts magnitudes in the x and y direction to an angle
+   * @param pitch - the getY of the joystick
+   * @param yaw - the getX of the joystick */
+  public double convertXboxToAngle(double pitch, double yaw) {
+    //pitch is negitive when fowards and yaw is negitive when left
+    final double adjustedPitch = -pitch; //negitve when fowards, odd
+    final double adjustedYaw = yaw;
+
+    //If you want to understand how it works I made a graph on desmos: https://www.desmos.com/calculator/yifkhasuyr
+    //CONVERT 360 TO RADIANS
+    // Look up atan2()
+    if (Math.copySign(1, adjustedPitch) == 1) {
+      return Math.atan(adjustedYaw/adjustedPitch) % 360;
+    } else {
+      return (Math.atan(adjustedYaw/adjustedPitch)+180) % 360;
     }
   }
 
@@ -115,7 +137,7 @@ public class turret extends TrapezoidProfileSubsystem {
   }
 
   // set the angle to angles in radians
-  public void setAngleGoal(double angle){
+  private void setAngleGoal(double angle){
     super.setGoal(new State(angle, 0.0));
   }
 }
