@@ -10,6 +10,9 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.TurnTurret;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.turret;
+
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,7 +32,7 @@ public class RobotContainer {
   private final XboxController m_controller = new XboxController(0);
 
   //
-  private final turret m_Turret = new turret(0);
+  private final turret m_turret = new turret(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -49,13 +52,7 @@ public class RobotContainer {
   private void configureBindings() {
     
   }
-
-  public Command getTurretCommand() {
-   // return new TurnTurret(m_Turret, () -> m_Turret.convertXboxToAngle(m_controller.getRightX(), m_controller.getRightY()) );
-    return new TurnTurret(m_Turret, () -> m_Turret.convertXboxToAngle(m_controller.getRightX(), m_controller.getRightY()) );
-
-  }
-
+  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -64,5 +61,13 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return Autos.exampleAuto(m_exampleSubsystem);
+  }
+  
+  public Command getTurretCommand() {
+   
+   return new TurnTurret(m_turret, () -> m_turret.convertXboxToAngle(m_controller.getRightX(), m_controller.getRightY()));
+
+    // return new TurnTurret();
+
   }
 }

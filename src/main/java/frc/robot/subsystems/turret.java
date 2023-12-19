@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -98,7 +100,7 @@ public class turret extends TrapezoidProfileSubsystem {
   /** Turns the turret. 
    * @param angle - must be bewteen 0 and 360 */
   public void setTurretAngle(double angle){
-    if (angle >= 0 && angle <= 360) {
+    if (angle >= Math.toRadians(0) && angle <= Math.toRadians(360)) {
       setAngle(getAngle()-turretOffset);
     }
   }
@@ -106,20 +108,20 @@ public class turret extends TrapezoidProfileSubsystem {
 
   //REPLACE PITCH AND YAW WITH BACK AND FORTH
   /** Converts magnitudes in the x and y direction to an angle
-   * @param pitch - the getY of the joystick
-   * @param yaw - the getX of the joystick */
-  public double convertXboxToAngle(double pitch, double yaw) {
-    //pitch is negitive when fowards and yaw is negitive when left
-    final double adjustedPitch = -pitch; //negitve when fowards, odd
-    final double adjustedYaw = yaw;
+   * @param joystickY - the getY of the joystick
+   * @param joystickX - the getX of the joystick */
+  public double convertXboxToAngle(double joystickY, double joystickX) {
+    //Y is negitive when fowards and X is negitive when left
+    final double adjustedY = -joystickY; //negitve when fowards, odd
+    final double adjustedX = joystickX;
 
     //If you want to understand how it works I made a graph on desmos: https://www.desmos.com/calculator/yifkhasuyr
     //CONVERT 360 TO RADIANS
     // Look up atan2()
-    if (Math.copySign(1, adjustedPitch) == 1) {
-      return Math.atan(adjustedYaw/adjustedPitch) % 360;
+    if (Math.copySign(1, adjustedY) == 1) {
+      return Math.atan(adjustedX/adjustedY) % Math.toRadians(360);
     } else {
-      return (Math.atan(adjustedYaw/adjustedPitch)+180) % 360;
+      return (Math.atan(adjustedX/adjustedY)+Math.toRadians(180)) % Math.toRadians(360);
     }
   }
 
