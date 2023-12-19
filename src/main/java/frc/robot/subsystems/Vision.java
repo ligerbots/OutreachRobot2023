@@ -8,4 +8,18 @@ public class Vision extends SubsystemBase {
         return 0;
     }
 
+    public void setMode(VisionMode goalfinder) {}
+
+    public enum VisionMode {
+        INTAKE,                 // driver view through Intake camera
+        SHOOTER,                // driver view through Shooter camera
+        GOALFINDER,
+        BALLFINDER,
+        HOPPERFINDER,
+        GALACTIC_SEARCH_PATH_CHOOSER,
+    }
+
+    public double getRobotAngle() {
+        return 0;
+    }
 }

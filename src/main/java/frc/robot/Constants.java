@@ -23,6 +23,12 @@ public final class Constants {
   public static final double TURRET_ANGLE_COEFFICIENT = 180; // TODO: Fix this
   public static final double WARM_UP_RPM = 3000; // TODO: find a good value
 
+  public static final int LEADER_LEFT_CAN_ID = 12;
+  public static final int LEADER_RIGHT_CAN_ID = 8;
+  public static final int FOLLOWER_LEFT_CAN_ID = 9; 
+  public static final int FOLLOWER_RIGHT_CAN_ID = 11;
+  public static final int CAROUSEL_FIFTH_ROTATION_TICKS = 0;
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }

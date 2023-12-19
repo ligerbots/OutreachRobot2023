@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -13,35 +12,28 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.FollowerType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import frc.robot.Constants;
 
 
 public class Shooter extends TrapezoidProfileSubsystem {
   WPI_TalonFX m_motorLeader, m_motorFollower;
-  WPI_TalonFX flup;
+  // the thing that actually does the shooting
+  WPI_TalonFX m_flup;
   TalonFXSensorCollection m_shooterEncoder;
-  Servo hoodServo, turretServo;
-  TreeMap<Double, Double[]> distanceLookUp = new TreeMap<Double,Double[]>() {}; //set up lookup table for ranges
-  TreeMap<Double, Double> turretAngleLookup = new TreeMap<Double, Double>() {};
+  Servo m_hoodServo, m_turretServo;
+  TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double,Double[]>() {}; //set up lookup table for ranges
+  TreeMap<Double, Double> m_turretAngleLookup = new TreeMap<Double, Double>() {};
   DutyCycleEncoder m_dutyEncoder;
 
   public Vision m_vision;
@@ -49,8 +41,10 @@ public class Shooter extends TrapezoidProfileSubsystem {
   public int m_hoodAdjustment = 0;
   public double m_angleErrorAfterTurn = 0;
 
-  private static final double SHOULDER_MAX_ANGLE = Math.toRadians(30.0);  
-  private static final double SHOULDER_MIN_ANGLE = Math.toRadians(-65.0);
+  
+
+  // private static final double SHOULDER_MAX_ANGLE = Math.toRadians(30.0);  
+  // private static final double SHOULDER_MIN_ANGLE = Math.toRadians(-65.0);
 
   public static final double SHOULDER_ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0);
 
@@ -63,11 +57,11 @@ public class Shooter extends TrapezoidProfileSubsystem {
   // All units are MKS with angles in Radians
 
   // Feedforward constants for the shoulder
-  private static final double SHOULDER_KS = 0.182; // TODO: This may need to be tuned
+  // private static final double SHOULDER_KS = 0.182; // TODO: This may need to be tuned
   // The following constants are computed from https://www.reca.lc/arm
-  private static final double SHOULDER_KG = 0.09; // V
-  private static final double SHOULDER_KV = 6.60; // V*sec/rad
-  private static final double SHOULDER_KA = 0.01; // V*sec^2/rad
+  // private static final double SHOULDER_KG = 0.09; // V
+  // private static final double SHOULDER_KV = 6.60; // V*sec/rad
+  // private static final double SHOULDER_KA = 0.01; // V*sec^2/rad
   
 
   // Constants to limit the shoulder rotation speed
@@ -84,77 +78,78 @@ public class Shooter extends TrapezoidProfileSubsystem {
   // PID Constants for the shoulder PID controller
   // Since we're using Trapeziodal control, all values will be 0 except for P
   private static final double SHOULDER_K_P = 0.15;
-  private static final double SHOULDER_K_I = 0.0;
-  private static final double SHOULDER_K_D = 0.0;
-  private static final double SHOULDER_K_FF = 0.0;
+  private static final double SHOULDER_K_I = 0;
+  private static final double SHOULDER_K_D = 0;
+  private static final double SHOULDER_K_FF = 0;
   private static final int kPIDLoopIdx = 0;
   private static final int kTimeoutMs = 0;
   private boolean m_coastMode = false;
 
   // The TalonFX, the integrated motor controller for the Falcon, uses ticks as it's noative unit.
   // There are 2048 ticks per revolution. Need to account for the gear ratio.
-  private static final double SHOULDER_RADIAN_PER_UNIT = 2 * Math.PI / (2048.0 * SHOULDER_GEAR_RATIO);
+  private static final double SHOULDER_RADIAN_PER_UNIT = 2 * Math.PI / (2048 * SHOULDER_GEAR_RATIO);
 
+  // constructor
   public Shooter(Vision vision, DutyCycleEncoder dutyCycleEncoder) {
     super(new TrapezoidProfile.Constraints(SHOULDER_MAX_VEL_RADIAN_PER_SEC / SHOULDER_RADIAN_PER_UNIT,
-                SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ / SHOULDER_RADIAN_PER_UNIT),
-                (SHOULDER_OFFSET_RADIAN-dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
+      SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ / SHOULDER_RADIAN_PER_UNIT),
+      (SHOULDER_OFFSET_RADIAN-dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
 
-        m_motorLeader = new WPI_TalonFX(Constants.SHOOTER_ONE_ID);
-        m_motorFollower = new WPI_TalonFX(Constants.SHOOTER_TWO_ID);
+    m_motorLeader = new WPI_TalonFX(Constants.SHOOTER_ONE_ID);
+    m_motorFollower = new WPI_TalonFX(Constants.SHOOTER_TWO_ID);
 
-        m_motorLeader.configFactoryDefault();
-        m_motorFollower.configFactoryDefault();
+    m_motorLeader.configFactoryDefault();
+    m_motorFollower.configFactoryDefault();
 
-        m_shooterEncoder = m_motorLeader.getSensorCollection();
+    m_shooterEncoder = m_motorLeader.getSensorCollection();
 
-        m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs);
-        // Set follower
-        m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
+    m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs);
+    // Set follower
+    m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
 
-        m_motorLeader.config_kF(kPIDLoopIdx, SHOULDER_K_FF, kTimeoutMs);
+    m_motorLeader.config_kF(kPIDLoopIdx, SHOULDER_K_FF, kTimeoutMs);
 		m_motorLeader.config_kP(kPIDLoopIdx, SHOULDER_K_P, kTimeoutMs);
 		m_motorLeader.config_kI(kPIDLoopIdx, SHOULDER_K_I, kTimeoutMs);
 		m_motorLeader.config_kD(kPIDLoopIdx, SHOULDER_K_D, kTimeoutMs);
 
-        // limits for motor leader and folower
-        // always limit current to the values. Trigger limit = 0 so that it is always enforced.
-        m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, LEADER_CURRENT_LIMIT, 0, 0));
-        m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, FOLLOW_CURRENT_LIMIT, 0, 0));
+    // limits for motor leader and folower
+    // always limit current to the values. Trigger limit = 0 so that it is always enforced.
+    m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, LEADER_CURRENT_LIMIT, 0, 0));
+    m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, FOLLOW_CURRENT_LIMIT, 0, 0));
 
-        m_dutyEncoder = dutyCycleEncoder;
+    m_dutyEncoder = dutyCycleEncoder;
 
-        // Encoder distance is in radians
-        m_dutyEncoder.setDistancePerRotation(2 * Math.PI);
-        m_dutyEncoder.setPositionOffset(SHOULDER_POSITION_OFFSET);
+    // Encoder distance is in radians
+    m_dutyEncoder.setDistancePerRotation(2 * Math.PI);
+    m_dutyEncoder.setPositionOffset(SHOULDER_POSITION_OFFSET);
 
-        double initialAngle = -m_dutyEncoder.getDistance();
-        // SmartDashboard.putNumber("shoulder/initAngle", Units.radiansToDegrees(initialAngle));
+    double initialAngle = -m_dutyEncoder.getDistance();
+    // SmartDashboard.putNumber("shoulder/initAngle", Units.radiansToDegrees(initialAngle));
 
-        // Set the motor encoder and Position setpoint to the initialAngle from the absolute encoder
-        m_shooterEncoder.setIntegratedSensorPosition(initialAngle / SHOULDER_RADIAN_PER_UNIT, 0);
+    // Set the motor encoder and Position setpoint to the initialAngle from the absolute encoder
+    m_shooterEncoder.setIntegratedSensorPosition(initialAngle / SHOULDER_RADIAN_PER_UNIT, 0);
 
-        SmartDashboard.putNumber("shoulder/leaderCurrentLimit", LEADER_CURRENT_LIMIT);
-        SmartDashboard.putNumber("shoulder/followCurrentLimit", FOLLOW_CURRENT_LIMIT);
-        // m_motorLeader.setSelectedSensorPosition(-m_Duty_Encoder.getDistance());
-        // m_motorLeader.setSelectedSensorPosition(m_encoder.getIntegratedSensorPosition());
-        // m_motorLeader.setSelectedSensorPosition(initialAngle / SHOULDER_RADIAN_PER_UNIT);
-        // SmartDashboard.putNumber("shoulder/motorLeaderIntegSensPos", m_motorLeader.getSelectedSensorPosition());
+    SmartDashboard.putNumber("shoulder/leaderCurrentLimit", LEADER_CURRENT_LIMIT);
+    SmartDashboard.putNumber("shoulder/followCurrentLimit", FOLLOW_CURRENT_LIMIT);
+    // m_motorLeader.setSelectedSensorPosition(-m_Duty_Encoder.getDistance());
+    // m_motorLeader.setSelectedSensorPosition(m_encoder.getIntegratedSensorPosition());
+    // m_motorLeader.setSelectedSensorPosition(initialAngle / SHOULDER_RADIAN_PER_UNIT);
+    // SmartDashboard.putNumber("shoulder/motorLeaderIntegSensPos", m_motorLeader.getSelectedSensorPosition());
 
-        // m_Duty_Encoder.setPositionOffset(SHOULDER_OFFSET_RADIAN);
-        // m_motorSim = new TalonFXSimCollection(m_motorLeader);
-        // m_encoderSim = new TalonFXSimCollection(m_encoder);
-        // SmartDashboard.putNumber("shoulder/absoluteEncoder", Math.toDegrees(-m_dutyEncoder.getDistance()));
-        // SmartDashboard.putNumber("shoulder/P Gain", m_kPShoulder);
-        // SmartDashboard.putData("shoulder Sim", m_mech2d);
+    // m_Duty_Encoder.setPositionOffset(SHOULDER_OFFSET_RADIAN);
+    // m_motorSim = new TalonFXSimCollection(m_motorLeader);
+    // m_encoderSim = new TalonFXSimCollection(m_encoder);
+    // SmartDashboard.putNumber("shoulder/absoluteEncoder", Math.toDegrees(-m_dutyEncoder.getDistance()));
+    // SmartDashboard.putNumber("shoulder/P Gain", m_kPShoulder);
+    // SmartDashboard.putData("shoulder Sim", m_mech2d);
 
-        setCoastMode(false);
-        SmartDashboard.putBoolean("shoulder/coastMode", m_coastMode);
-        // SmartDashboard.putNumber("shoulder/kFeedForward", m_kFeedForward);
+    setCoastMode(false);
+    SmartDashboard.putBoolean("shoulder/coastMode", m_coastMode);
+    // SmartDashboard.putNumber("shoulder/kFeedForward", m_kFeedForward);
 
-        // m_motorLeader.set(ControlMode.Position, )
-        // m_motorLeader.set(ControlMode.Position, m_encoder.getIntegratedSensorPosition(), DemandType.ArbitraryFeedForward, 0.0);//feedforward/12.0);
-        // setAngle(m_encoder.getIntegratedSensorPosition() * SHOULDER_RADIAN_PER_UNIT);
+    // m_motorLeader.set(ControlMode.Position, )
+    // m_motorLeader.set(ControlMode.Position, m_encoder.getIntegratedSensorPosition(), DemandType.ArbitraryFeedForward, 0.0);//feedforward/12.0);
+    // setAngle(m_encoder.getIntegratedSensorPosition() * SHOULDER_RADIAN_PER_UNIT);
 
     // We want motor2 to be master and motor1 and 3 follow the speed of motor2
     m_motorLeader.follow(m_motorFollower);
@@ -163,33 +158,72 @@ public class Shooter extends TrapezoidProfileSubsystem {
     m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
     m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
     // motor3.setSmartCurrentLimit(40);
+
+    // setup PID control for TalonFX
+        m_motorLeader.configFactoryDefault();
+        m_motorLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
+        m_motorLeader.set(ControlMode.Position,0);
+        m_motorLeader.config_kP(0, 50);
+        m_motorLeader.config_kI(0, 0);
+        m_motorLeader.config_kD(0, 0);
+        m_motorLeader.config_kF(0, 0);
+        m_motorLeader.setSensorPhase(false);
+
+        setMotorMode(NeutralMode.Coast);
+       
+
+        // m_leftEncoder.setDistancePerPulse(Constants.ENCODER_DISTANCE_PER_PULSE);
+        // m_rightEncoder.setDistancePerPulse(Constants.ENCODER_DISTANCE_PER_PULSE);
+        // m_rightEncoder.setReverseDirection(true);
+        
+
+        // if (RobotBase.isSimulation()) {
+
+        //     m_differentialDriveSim = new DifferentialDrivetrainSim(
+        //             Constants.kDrivetrainPlant,
+        //             Constants.kDriveGearbox,
+        //             Constants.kDriveGearing,
+        //             Constants.kTrackwidth,
+        //             Constants.kWheelDiameterMeters / 2.0,
+        //             null);
+
+        //     m_leftLeader_sim = m_leftLeader.getSimCollection();
+        //     m_rightLeader_sim = m_rightLeader.getSimCollection();
+        //             // m_leftEncoderSim = new EncoderSim(m_leftEncoder);
+        //     // m_rightEncoderSim = new EncoderSim(m_rightEncoder);
+        //     m_gyroAngleSim = new SimDeviceSim("navX-Sensor[0]").getDouble("Yaw");
+
+        //     m_fieldSim = new Field2d();
+        //     SmartDashboard.putData("Field", m_fieldSim);
+        // }
     
+
     // Reset Smart Dashboard for shooter test
     SmartDashboard.putString("shooter/Status", "Idle");
 
     // always have an entry at 0 so that it has a chance of working at short distances
-    distanceLookUp.put(0.0, new Double[] { 5500.0, 103.0 });
-    distanceLookUp.put(50.0, new Double[] { 5500.0, 103.0 });
-    distanceLookUp.put(110.0, new Double[] { 6500.0, 87.0 });
-    distanceLookUp.put(170.0, new Double[] { 8500.0, 70.0 });
-    distanceLookUp.put(230.0, new Double[] { 9000.0, 60.0 });
-    distanceLookUp.put(318.1, new Double[] { 9000.0, 55.0 });
+    m_distanceLookUp.put(0.0, new Double[] { 5500.0, 103.0 });
+    m_distanceLookUp.put(50.0, new Double[] { 5500.0, 103.0 });
+    m_distanceLookUp.put(110.0, new Double[] { 6500.0, 87.0 });
+    m_distanceLookUp.put(170.0, new Double[] { 8500.0, 70.0 });
+    m_distanceLookUp.put(230.0, new Double[] { 9000.0, 60.0 });
+    m_distanceLookUp.put(318.1, new Double[] { 9000.0, 55.0 });
     // extra far, to make sure the table work at the long end
-    distanceLookUp.put(400.0, new Double[] { 9000.0, 50.0 });
+    m_distanceLookUp.put(400.0, new Double[] { 9000.0, 50.0 });
 
     // The relative setting for non-zero angles needs to be recomputed if the zero setting chenges,
     // but at least we'll be close
-    turretAngleLookup.put(-5.0, Constants.TURRET_ANGLE_ZERO_SETTING - 23.0);
-    turretAngleLookup.put(-4.0, Constants.TURRET_ANGLE_ZERO_SETTING - 18.0);
-    turretAngleLookup.put(-3.0, Constants.TURRET_ANGLE_ZERO_SETTING - 11.0);
-    turretAngleLookup.put(-2.0, Constants.TURRET_ANGLE_ZERO_SETTING - 6.0);
-    turretAngleLookup.put(-1.0, Constants.TURRET_ANGLE_ZERO_SETTING - 4.0);
-    turretAngleLookup.put( 0.0, Constants.TURRET_ANGLE_ZERO_SETTING);
-    turretAngleLookup.put( 1.0, Constants.TURRET_ANGLE_ZERO_SETTING + 4.0);
-    turretAngleLookup.put( 2.0, Constants.TURRET_ANGLE_ZERO_SETTING + 7.0);
-    turretAngleLookup.put( 3.0, Constants.TURRET_ANGLE_ZERO_SETTING + 10.5);
-    turretAngleLookup.put( 4.0, Constants.TURRET_ANGLE_ZERO_SETTING + 13.0);
-    turretAngleLookup.put( 5.0, Constants.TURRET_ANGLE_ZERO_SETTING + 15.0);
+    m_turretAngleLookup.put(-5.0, Constants.TURRET_ANGLE_ZERO_SETTING - 23.0);
+    m_turretAngleLookup.put(-4.0, Constants.TURRET_ANGLE_ZERO_SETTING - 18.0);
+    m_turretAngleLookup.put(-3.0, Constants.TURRET_ANGLE_ZERO_SETTING - 11.0);
+    m_turretAngleLookup.put(-2.0, Constants.TURRET_ANGLE_ZERO_SETTING - 6.0);
+    m_turretAngleLookup.put(-1.0, Constants.TURRET_ANGLE_ZERO_SETTING - 4.0);
+    m_turretAngleLookup.put( 0.0, Constants.TURRET_ANGLE_ZERO_SETTING);
+    m_turretAngleLookup.put( 1.0, Constants.TURRET_ANGLE_ZERO_SETTING + 4.0);
+    m_turretAngleLookup.put( 2.0, Constants.TURRET_ANGLE_ZERO_SETTING + 7.0);
+    m_turretAngleLookup.put( 3.0, Constants.TURRET_ANGLE_ZERO_SETTING + 10.5);
+    m_turretAngleLookup.put( 4.0, Constants.TURRET_ANGLE_ZERO_SETTING + 13.0);
+    m_turretAngleLookup.put( 5.0, Constants.TURRET_ANGLE_ZERO_SETTING + 15.0);
 
     // used in ShooterPIDTuner
     SmartDashboard.putNumber("shooter/P", 0.000145);
@@ -198,6 +232,10 @@ public class Shooter extends TrapezoidProfileSubsystem {
     SmartDashboard.putNumber("shooter/F", 6.6774 * 0.00001);
   }
 
+  private void setMotorMode(NeutralMode coast) {
+  }
+
+  // called a lot
   @Override
   public void periodic() {
     SmartDashboard.putNumber("shooter/RPM", getSpeed());
@@ -206,7 +244,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
     SmartDashboard.putNumber("shooter/Hood_Adjustment", m_hoodAdjustment);
     SmartDashboard.putNumber("shooter/RPM_Adjustment", m_rpmAdjustment);
     SmartDashboard.putNumber("shooter/Output_Voltage", m_motorFollower.getMotorOutputVoltage());
-    SmartDashboard.putNumber("shooter/turretAngleRaw", turretServo.getAngle());
+    SmartDashboard.putNumber("shooter/turretAngleRaw", m_turretServo.getAngle());
   }
 
   public void setCoastMode(boolean coastMode){
@@ -229,7 +267,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
     if (angle > 160) {
         angle = 160;
     }
-    hoodServo.setAngle(angle);
+    m_hoodServo.setAngle(angle);
   }
 
   public double getSpeed() {
@@ -246,9 +284,10 @@ public class Shooter extends TrapezoidProfileSubsystem {
   //     pidController.setReference(voltage, ControlType.kVoltage);
   // }
 
+  // SHOOT!!!!!!!!!!
   public void shoot() {
     //if (flup.getOutputCurrent() < Constants.FLUP_STOP_CURRENT) {
-        flup.set(-0.5);
+        m_flup.set(-0.5);
     //} else {
     //    flup.set(0);
     //}*/
@@ -259,6 +298,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
     SmartDashboard.putString("shooter/Status", "Shooting");
   }
 
+  // does literally nothing
   public void setShooterRpm(double rpm) {
     System.out.println("Shooter RPM SET!!!!!");
     // for the shooter to run the right direction, rpm values passed to setReference must be negative
@@ -269,8 +309,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
   }
 
   public double calculateShooterSpeed(double distance) {
-    Entry<Double, Double[]> floorEntry = distanceLookUp.floorEntry(distance);
-    Entry<Double, Double[]> ceilingEntry = distanceLookUp.higherEntry(distance);
+    Entry<Double, Double[]> floorEntry = m_distanceLookUp.floorEntry(distance);
+    Entry<Double, Double[]> ceilingEntry = m_distanceLookUp.higherEntry(distance);
     if (floorEntry != null && ceilingEntry != null) {
       // Charles' calculation
       double ratio = 1 - (ceilingEntry.getKey() - distance) / (ceilingEntry.getKey() - floorEntry.getKey());
@@ -288,8 +328,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
   }
 
   public double calculateShooterHood(double distance) {
-    Entry<Double, Double[]> floorEntry = distanceLookUp.floorEntry(distance);
-    Entry<Double, Double[]> ceilingEntry = distanceLookUp.higherEntry(distance);
+    Entry<Double, Double[]> floorEntry = m_distanceLookUp.floorEntry(distance);
+    Entry<Double, Double[]> ceilingEntry = m_distanceLookUp.higherEntry(distance);
 
     if (floorEntry != null && ceilingEntry != null) {
       // Charles calculation
@@ -315,35 +355,31 @@ public class Shooter extends TrapezoidProfileSubsystem {
   }
 
   public boolean hoodOnTarget(final double targetAngle) {
-    System.out.println("ServoPosition: " + hoodServo.getPosition());
-    return hoodServo.getAngle() > targetAngle - 0.5 && hoodServo.getAngle() < targetAngle + 0.5;
+    System.out.println("ServoPosition: " + m_hoodServo.getPosition());
+    return m_hoodServo.getAngle() > targetAngle - 0.5 && m_hoodServo.getAngle() < targetAngle + 0.5;
   }
 
-  /*
   public void calibratePID(final double p, final double i, final double d, final double f) {
-    pidController.setIAccum(0);
-    pidController.setP(p);
-    pidController.setI(i);
-    pidController.setD(d);
-    pidController.setFF(f);
-    pidController.setIZone(1000);
+    m_motorLeader.config_kP(0, p);
+    m_motorLeader.config_kI(0, i);
+    m_motorLeader.config_kD(0, d);
+    m_motorLeader.config_kF(0, f);
   }
-  */
 
   public void stopAll() {
     setShooterRpm(0.0);
-    flup.set(0);
+    m_flup.set(0);
     setHood(160);
     SmartDashboard.putString("shooter/Status", "Idle");
   }
 
   public double getTurretAngle() {
-    return turretServo.get() *  Constants.TURRET_ANGLE_COEFFICIENT;
+    return m_turretServo.get() *  Constants.TURRET_ANGLE_COEFFICIENT;
   }
 
   private void setTurret(double angle) {
     System.out.println("Moving turret to " + angle);
-    turretServo.setAngle(angle);
+    m_turretServo.setAngle(angle);
   }
 
   public void setTurretAdjusted(double adjustedAngle) {
@@ -354,10 +390,10 @@ public class Shooter extends TrapezoidProfileSubsystem {
     if (adjustedAngle < -5) {
       adjustedAngle = -5;
     }
-    Entry<Double, Double> floorEntry = adjustedAngle < 0 ? turretAngleLookup.higherEntry(adjustedAngle) : 
-                                                            turretAngleLookup.floorEntry(adjustedAngle);
-    Entry<Double, Double> ceilingEntry = adjustedAngle < 0 ? turretAngleLookup.floorEntry(adjustedAngle) :  
-                                                            turretAngleLookup.higherEntry(adjustedAngle);
+    Entry<Double, Double> floorEntry = adjustedAngle < 0 ? m_turretAngleLookup.higherEntry(adjustedAngle) : 
+                                                            m_turretAngleLookup.floorEntry(adjustedAngle);
+    Entry<Double, Double> ceilingEntry = adjustedAngle < 0 ? m_turretAngleLookup.floorEntry(adjustedAngle) :  
+                                                            m_turretAngleLookup.higherEntry(adjustedAngle);
                                                     
     if (floorEntry != null && ceilingEntry != null) {
       // Charles calculation
@@ -377,6 +413,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
   @Override
   protected void useState(State state) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'useState'");
+    // throw new UnsupportedOperationException("Unimplemented method 'useState'");
   }
+
 }

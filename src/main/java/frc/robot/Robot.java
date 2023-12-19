@@ -83,6 +83,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {}
 
+  public static double time() {
+    return System.nanoTime() * 1.0e-9;
+  }
+
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
