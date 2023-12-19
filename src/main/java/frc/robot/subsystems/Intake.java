@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.ExampleCommand;
 
 
 
@@ -30,15 +31,24 @@ public class Intake extends SubsystemBase {
   }
 
   public void run(double speed){
-    intakeMotor.set(-speed);
+    intakeMotor.set(-speed); 
+    // function to run the motor
   }
 
   public void IntakeBalls(){
-    run(0.25);
+    run(0.25); 
+    // experiment with the numbers
+    // showing speed of motor when intaking balls
   }
 
   public void OutputBalls(){
-    run(-0.25);
+    run(-0.25); 
+    // experiment with the numbers
+    // showing the speed of motor when outputting balls
+  }
+
+  public Intake onTrue(ExampleCommand exampleCommand) {
+    return null;
   }
 
 }
