@@ -64,10 +64,7 @@ public class RobotContainer {
   }
   
   public Command getTurretCommand() {
-   
-   return new TurnTurret(m_turret, () -> m_turret.convertXboxToAngle(m_controller.getRightX(), m_controller.getRightY()));
-
-    // return new TurnTurret();
-
+  //  return new TurnTurret(m_turret, () -> m_turret.convertXboxToAngle(m_controller.getRightX(), m_controller.getRightY())); //joystick control
+   return new TurnTurret(m_turret, () -> m_controller.getPOV()); //D pad control
   }
 }

@@ -12,9 +12,11 @@ import frc.robot.subsystems.turret;
 public class TurnTurret extends CommandBase {
   /** Creates a new turretCommand. */
   private turret m_turret;
+  private DoubleSupplier m_turretAngle;
   public TurnTurret(turret turretInstance, DoubleSupplier turretAngle) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_turret = turretInstance;
+    m_turretAngle = turretAngle;
   }
 
   // Called when the command is initially scheduled.

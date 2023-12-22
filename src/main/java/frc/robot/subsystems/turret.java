@@ -106,7 +106,6 @@ public class turret extends TrapezoidProfileSubsystem {
   }
 
 
-  //REPLACE PITCH AND YAW WITH BACK AND FORTH
   /** Converts magnitudes in the x and y direction to an angle
    * @param joystickY - the getY of the joystick
    * @param joystickX - the getX of the joystick */
@@ -116,7 +115,6 @@ public class turret extends TrapezoidProfileSubsystem {
     final double adjustedX = joystickX;
 
     //If you want to understand how it works I made a graph on desmos: https://www.desmos.com/calculator/yifkhasuyr
-    //CONVERT 360 TO RADIANS
     // Look up atan2()
     if (Math.copySign(1, adjustedY) == 1) {
       return Math.atan(adjustedX/adjustedY) % Math.toRadians(360);
