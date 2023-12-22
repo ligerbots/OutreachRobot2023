@@ -10,6 +10,8 @@ import frc.robot.subsystems.Flop;
 public class FlopCommand extends CommandBase {
   private Flop m_flop;
 
+  static final double SPEED = 0;  
+
   /** Creates a new FlopCommand. */
   public FlopCommand(Flop flop) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -23,7 +25,7 @@ public class FlopCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_flop.run(0);
+    m_flop.run(SPEED);
   }
 
   // Called once the command ends or is interrupted.
