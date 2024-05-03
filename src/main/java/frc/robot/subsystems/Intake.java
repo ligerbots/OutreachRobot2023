@@ -13,15 +13,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.commands.ExampleCommand;
 
-
-
+enum IntakePivotState {
+  RETRACTED,
+  DEPLOYED
+}
 
 public class Intake extends SubsystemBase {
   CANSparkMax intakeMotor;
+  CANSparkMax pivotMotor;
   /** Creates a new Intake. */
   
   public Intake() {
-    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
+    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
+    pivotMotor = new CANSparkMax(Constants.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
     intakeMotor.setIdleMode(IdleMode.kBrake);   
   }
 

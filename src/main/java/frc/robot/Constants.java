@@ -18,4 +18,5 @@ public final class Constants {
   }
 
   public static final int INTAKE_MOTOR_CAN_ID = 0;
+  public static final int INTAKE_PIVOT_MOTOR_CAN_ID = 1;
 }
