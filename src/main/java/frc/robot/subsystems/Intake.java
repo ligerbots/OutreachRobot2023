@@ -30,6 +30,7 @@ public class Intake extends SubsystemBase {
   private final RelativeEncoder m_pivotEncoder;
   private final double RETRACTED_POSITION = 0.0; //TODO: find right values
   private final double DEPLOYED_POSITION = 0.0; //TODO: find right values
+  private IntakePivotState pivotState = IntakePivotState.RETRACTED; //TODO: verify that starting in retracted is reasonable
 
   //PID Stuff
   private SparkMaxPIDController m_pidController;
@@ -88,11 +89,21 @@ public class Intake extends SubsystemBase {
   }
 
   private void setPivotAngle(double angle) {
-    m_pidController.setReference(angle); //TODO: finish
+    //m_pidController.setReference(angle); TODO: find out what the control type is
   }
 
   public void deployIntake() {
+    setPivotAngle(DEPLOYED_POSITION);
+    pivotState = IntakePivotState.DEPLOYED;
+  }
 
+  public void retractIntake() {
+    setPivotAngle(RETRACTED_POSITION);
+    pivotState = IntakePivotState.RETRACTED;
+  }
+
+  public IntakePivotState getPivotState() {
+    return pivotState;
   }
 
   public Intake onTrue(ExampleCommand exampleCommand) {
