@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -19,14 +21,37 @@ enum IntakePivotState {
 }
 
 public class Intake extends SubsystemBase {
-  CANSparkMax intakeMotor;
-  CANSparkMax pivotMotor;
+  private CANSparkMax m_intakeMotor;
+  private CANSparkMax m_pivotMotor;
+  private final double INTAKE_VOLTAGE = 0.25;
+  private double speed;
+  private final double PIVOT_GEAR_REDUCTION = 1.0 / 33.0;
+  private final double RADIANS_PER_REVOLUTION = 2 * Math.PI * PIVOT_GEAR_REDUCTION;
+  private final RelativeEncoder m_pivotEncoder;
+  private final double RETRACTED_POSITION = 0.0; //TODO: find right values
+  private final double DEPLOYED_POSITION = 0.0; //TODO: find right values
+
+  //PID Stuff
+  private SparkMaxPIDController m_pidController;
+  private static double K_P = 1.0; //TODO: tune these
+  private static double K_I = 0.0;
+  private static double K_D = 0.0;
+  private static double K_FF = 1.0;
   /** Creates a new Intake. */
   
   public Intake() {
-    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
-    pivotMotor = new CANSparkMax(Constants.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
-    intakeMotor.setIdleMode(IdleMode.kBrake);   
+    m_intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
+    m_intakeMotor.setIdleMode(IdleMode.kBrake);
+    
+    m_pivotMotor = new CANSparkMax(Constants.INTAKE_PIVOT_MOTOR_CAN_ID, MotorType.kBrushless);
+    m_pivotMotor.restoreFactoryDefaults();
+    m_pivotEncoder = m_pivotMotor.getEncoder();
+    m_pivotEncoder.setPositionConversionFactor(RADIANS_PER_REVOLUTION);
+    m_pidController = m_pivotMotor.getPIDController();
+    m_pidController.setP(K_P);
+    m_pidController.setI(K_I);
+    m_pidController.setD(K_D);
+    m_pidController.setFF(K_FF);
   }
 
   @Override
@@ -35,24 +60,42 @@ public class Intake extends SubsystemBase {
   }
 
   public void run(double speed){
-    intakeMotor.set(-speed); 
+    m_intakeMotor.set(-speed);
     // function to run the motor
   }
 
   public void IntakeBalls(){
-    run(0.25); 
+    run(INTAKE_VOLTAGE);
+    speed = INTAKE_VOLTAGE;
     // experiment with the numbers
     // showing speed of motor when intaking balls
   }
 
   public void OutputBalls(){
-    run(-0.25); 
+    run(INTAKE_VOLTAGE * -1); 
+    speed = INTAKE_VOLTAGE * -1;
     // experiment with the numbers
     // showing the speed of motor when outputting balls
+  }
+
+  public void StopIntake(){
+    run(0);
+    speed = 0.0;
+  }
+
+  public double getSpeed() {
+    return speed;
+  }
+
+  private void setPivotAngle(double angle) {
+    m_pidController.setReference(angle); //TODO: finish
+  }
+
+  public void deployIntake() {
+
   }
 
   public Intake onTrue(ExampleCommand exampleCommand) {
     return null;
   }
-
 }
