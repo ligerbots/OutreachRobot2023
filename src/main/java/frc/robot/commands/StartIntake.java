@@ -22,7 +22,7 @@ public class StartIntake extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.run(m_speed);
+    m_intake.runIntakeRollers(m_speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -33,7 +33,7 @@ public class StartIntake extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     if (interrupted){
-      m_intake.run(0);
+      m_intake.runIntakeRollers(0);
     }
   }
 
