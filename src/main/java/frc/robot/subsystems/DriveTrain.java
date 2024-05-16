@@ -8,8 +8,12 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 //import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 //import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -20,17 +24,19 @@ import frc.robot.Constants;
 public class DriveTrain extends SubsystemBase {
 
 //check what we should add in constants and what in subsystems
-  private CANSparkMax m_leftMotor;
-  private CANSparkMax m_rightMotor;
+
+  private CANSparkMax m_leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
+  private CANSparkMax m_rightMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
+ //Do we need leader, follower?
 
   private DifferentialDrive m_differentialDrive;
-  
+  private DifferentialDriveOdometry m_odometry;
+
+  private ADXRS450_Gyro m_gyro;
+  //(Maria?, private AHRS m_navX;)
+
   //Sim collection??(ex.TalonFXSimCollection)
   //fieldSim?? gyroAngleSim??
-  //private DifferentialDriveOdometry m_odometry;
-  //private ADXRS450_Gyro m_gyro;
-  //(Maria?, private AHRS m_navX;)
-  
   //Encoders
   //private Encoder m_leftEncoder = new Encoder(Constants.LEFT_ENCODER_PORTS[0],Constants.LEFT_ENCODER_PORTS[1])
   //private Encoder m_rightEncoder = new Encoder(Constants.RIGHT_ENCODER_PORTS[0],Constants.RIGHT_ENCODER_PORTS[1])
@@ -43,7 +49,8 @@ public class DriveTrain extends SubsystemBase {
   private static double K_I = 0.0;
   private static double K_D = 0.0;
   private static double K_FF = 0.0;
-  
+
+  private final double MAX_SPEED_METERS_PER_SECOND = 10.0;
   /** Creates a new DriveTrain. */
 
 
@@ -68,4 +75,26 @@ public class DriveTrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
+
+  public void setLeftSpeed(double speedMetersPerSecond){
+    m_leftController.setReference(limitSpeed(speedMetersPerSecond), ControlType.kVelocity);
+  }
+
+  public void setRightSpeed(double speedMetersPerSecond){
+    m_rightController.setReference(limitSpeed(speedMetersPerSecond), ControlType.kVelocity);
+  }
+  
+  private double limitSpeed(double speed){
+    return MathUtil.clamp(speed, -MAX_SPEED_METERS_PER_SECOND, MAX_SPEED_METERS_PER_SECOND);
+  }
+
+  /* 
+  public double getLeftSpeed(){
+     return m_leftMotor.get();
+  }
+  public double getRightSpeed(){
+    return -m_rightMotor.get();
+  }
+  */
+
 }
