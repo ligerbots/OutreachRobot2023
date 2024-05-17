@@ -7,22 +7,19 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
 
-public class StartIntake extends CommandBase {
+public class DeployIntake extends CommandBase {
   Intake m_intake;
-  double m_speed;
-  /** Creates a new StartIntake. */
   
-  
-  public StartIntake(Intake intake, double speed) {
+  /** Creates a new DeployIntake. */
+  public DeployIntake(Intake intake) {
     m_intake = intake;
-    m_speed = speed; 
     addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.runIntakeRollers(m_speed);
+    m_intake.deployIntake();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -31,11 +28,7 @@ public class StartIntake extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    if (interrupted){
-      m_intake.runIntakeRollers(0);
-    }
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

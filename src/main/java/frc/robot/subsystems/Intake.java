@@ -21,9 +21,9 @@ public class Intake extends SubsystemBase {
   private IntakePivot m_intakePivot;
   
   /** Creates a new Intake. */
-  public Intake(IntakeRollers intakeRollers, IntakePivot intakePivot) {
-    m_intakeRollers = intakeRollers;
-    m_intakePivot = intakePivot;
+  public Intake() {
+    m_intakeRollers = new IntakeRollers();
+    m_intakePivot = new IntakePivot();
   }
 
   //IntakePivot methods
