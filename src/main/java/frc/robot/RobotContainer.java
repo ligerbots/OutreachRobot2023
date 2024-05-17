@@ -57,7 +57,7 @@ public class RobotContainer {
 
     //defining functionality
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    xboxA.onTrue(new StartIntake(m_intake, 0));
+    xboxA.onTrue(new StartIntake(m_intake, 1)); //TODO: find working value for speed voltage
     xboxB.onTrue(new RunTransfer(m_transfer));
   }
 

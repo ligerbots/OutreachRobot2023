@@ -16,23 +16,23 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.commands.ExampleCommand;
 
-public class Transfer extends SubsystemBase {
-  private CANSparkMax m_transferMotor;
+public class Flop extends SubsystemBase {
+  private CANSparkMax m_flopMotor;
   private final double m_speed = 1.00; //TODO: find working voltage values
   
   /** Creates a new Intake. */
-  public Transfer() {
-    m_transferMotor = new CANSparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
-    m_transferMotor.setIdleMode(IdleMode.kBrake);
+  public Flop() {
+    m_flopMotor = new CANSparkMax(Constants.FLOP_MOTOR_CAN_ID, MotorType.kBrushless);
+    m_flopMotor.setIdleMode(IdleMode.kBrake);
   }
 
   //Transfer methods
   public void run() {
-    m_transferMotor.set(m_speed);
+    m_flopMotor.set(m_speed);
   }
 
   public void stop() {
-    m_transferMotor.set(0);
+    m_flopMotor.set(0);
   }
 
   @Override

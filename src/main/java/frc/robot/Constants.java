@@ -17,6 +17,8 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static final int INTAKE_MOTOR_CAN_ID = 0;
+  public static final int INTAKE_ROLLERS_MOTOR_CAN_ID = 0;
   public static final int INTAKE_PIVOT_MOTOR_CAN_ID = 1;
+  public static final int TRANSFER_MOTOR_CAN_ID = 2;
+  public static final int FLOP_MOTOR_CAN_ID = 1;
 }

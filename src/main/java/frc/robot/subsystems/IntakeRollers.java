@@ -19,7 +19,7 @@ public class IntakeRollers extends SubsystemBase {
 
   /** Creates a new IntakeRollers. */
   public IntakeRollers() {
-    m_intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
+    m_intakeMotor = new CANSparkMax(Constants.INTAKE_ROLLERS_MOTOR_CAN_ID, MotorType.kBrushless);
     m_intakeMotor.setIdleMode(IdleMode.kBrake);
   }
 
