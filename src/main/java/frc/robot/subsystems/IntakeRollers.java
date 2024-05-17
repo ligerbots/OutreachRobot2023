@@ -28,14 +28,14 @@ public class IntakeRollers extends SubsystemBase {
     // function to run the motor
   }
 
-  public void IntakeBalls(){
+  public void intake(){
     run(INTAKE_VOLTAGE);
     speed = INTAKE_VOLTAGE;
     // experiment with the numbers
     // showing speed of motor when intaking balls
   }
 
-  public void OutputBalls(){
+  public void outtake(){
     run(INTAKE_VOLTAGE * -1); 
     speed = INTAKE_VOLTAGE * -1;
     // experiment with the numbers

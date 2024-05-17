@@ -44,16 +44,16 @@ public class Intake extends SubsystemBase {
     m_intakeRollers.run(speed);
   }
 
-  public void IntakeBalls(){
-    m_intakeRollers.IntakeBalls();
+  public void intake(){
+    m_intakeRollers.intake();
   }
 
-  public void OutputBalls(){
-    m_intakeRollers.OutputBalls();
+  public void outtake(){
+    m_intakeRollers.outtake();
   }
 
-  public void StopIntakeRollers(){
-    m_intakeRollers.IntakeBalls();
+  public void stopIntakeRollers(){
+    m_intakeRollers.intake();
   }
 
   public double getIntakeRollersSpeed() {
