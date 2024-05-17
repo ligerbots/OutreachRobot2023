@@ -18,7 +18,7 @@ import frc.robot.commands.ExampleCommand;
 
 public class Transfer extends SubsystemBase {
   private CANSparkMax m_transferMotor;
-  private final double m_speed = 1.00; //This is a voltage
+  private final double m_speed = 1.00; //TODO: find working voltage values
   
   /** Creates a new Intake. */
   public Transfer() {
@@ -29,6 +29,10 @@ public class Transfer extends SubsystemBase {
   //Transfer methods
   public void run() {
     m_transferMotor.set(m_speed);
+  }
+
+  public void stop() {
+    m_transferMotor.set(0);
   }
 
   @Override
