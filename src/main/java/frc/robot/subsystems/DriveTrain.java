@@ -79,19 +79,33 @@ private int prevBallLocation = 0;
 private int prevStartLocation = 10; // ASK WHAT THIS IS FOR!!!
 
 //PID
-private SparkMaxPIDController m_PidController;
+private SparkMaxPIDController m_leftController;
+private SparkMaxPIDController m_rightController;
+
 private static double K_P = 1.0;
 private static double K_I = 0.0;
 private static double K_D = 0.0; 
 private static double K_FF = 1.0;
 
+private static final double DISTANCE_PER_PULSE = 0.0; //0.00155852448 
 
 public DriveTrain() {
+  m_leftController = leftMotor.getPIDController();
+  m_leftController.setP(K_P);
+  m_leftController.setI(K_I);
+  m_leftController.setD(K_D);
+  m_leftController.setFF(K_FF);
+  m_rightController = rightMotor.getPIDController();
+  m_rightController.setP(K_P);
+  m_rightController.setI(K_I);
+  m_rightController.setD(K_D);
+  m_rightController.setFF(K_FF);
+
   
   robotDrive = new DifferentialDrive(leftMotor, rightMotor);
   robotDrive.setSafetyEnabled(false);
 
-  navX = new AHRSSimWrapper(Port.kMXP, (byte) 200); //(ASK!!!!)
+  //navX = new AHRSSimWrapper(Port.kMXP, (byte) 200); //(ASK!!!!)
 
   // Set current limiting on drve train to prevent brown outs
   Arrays.asList(leftMotor, rightMotor) //(ASK!!)
@@ -111,7 +125,7 @@ public DriveTrain() {
 
   leftEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
   rightEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
-  private static final double DISTANCE_PER_PULSE = 0.0; //0.00155852448 
+  
 
   odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), DISTANCE_PER_PULSE, DISTANCE_PER_PULSE);
 
@@ -166,7 +180,7 @@ public void setPose(Pose2d pose) {
   // The left and right encoders MUST be reset when odometry is reset
   leftEncoder.reset();
   rightEncoder.reset();
-  odometry.resetPosition(pose, Rotation2d.fromDegrees(getGyroAngle()));  //(ASK!!)
+  odometry.resetPosition(Rotation2d.fromDegrees(getGyroAngle()), 0.0, 0.0, pose);  //(ASK!!)
 }
 
 public void tankDriveVolts (double leftVolts, double rightVolts) {
@@ -192,7 +206,7 @@ public double getHeading() {
 }
 
 private double getGyroAngle() {
-  return Math.IEEEremainder(navX.getAngle(), 360) * -1; // -1 wa put here for unknown reason look in documatation
+  return Math.IEEEremainder(m_navX.getAngle(), 360) * -1; // -1 wa put here for unknown reason look in documatation
 }
 
 public void resetOdometry (Pose2d pose) { // Same as setPose() but left here for compatibility
@@ -277,7 +291,7 @@ public DifferentialDriveWheelSpeeds getWheelSpeeds () {
   }
    
   public double getPitch() {
-    return navX.getPitch();    //(ASK!!)
+    return m_navX.getPitch();    //(ASK!!)
   }
 
 public void setIdleMode(IdleMode idleMode) {
