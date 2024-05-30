@@ -87,7 +87,7 @@ private static double K_I = 0.0;
 private static double K_D = 0.0; 
 private static double K_FF = 1.0;
 
-private static final double DISTANCE_PER_PULSE = 0.0; //0.00155852448 
+private static final double DISTANCE_PER_PULSE = 0.00155852448; //
 
 public DriveTrain() {
   m_leftController = leftMotor.getPIDController();
