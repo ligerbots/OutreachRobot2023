@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.subsystems.Carousel;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision.VisionMode;
@@ -25,7 +25,7 @@ public class Shoot extends CommandBase {
   double startTime;
 
   Shooter shooter;
-  Carousel carousel;
+  Turret carousel;
   DriveTrain robotDrive;
   ShooterPIDTuner pidTuner;
   double shooterTargetSpeed;
@@ -60,7 +60,7 @@ public class Shoot extends CommandBase {
     // private final MotorControllerGroup m_leftMotors = new MotorControllerGroup(m_leftLeader, m_leftFollower);
     private final MotorControllerGroup m_rightMotors = new MotorControllerGroup(m_rightLeader, m_rightFollower);
 
-  public Shoot(Shooter shooter, Carousel carousel, DriveTrain robotDrive, CarouselCommand carouselCommand, /*DriveCommand driveCommand,*/ boolean rescheduleDriveCommand) {
+  public Shoot(Shooter shooter, Turret carousel, DriveTrain robotDrive, CarouselCommand carouselCommand, /*DriveCommand driveCommand,*/ boolean rescheduleDriveCommand) {
     this.shooter = shooter;
     addRequirements(shooter);
     this.carousel = carousel;
@@ -130,7 +130,7 @@ public class Shoot extends CommandBase {
     pidTuner.spinUpTune();
     System.out.println("Initial NavX Heading: " + robotDrive.getHeading());
     // store current carouselTick value
-    initialCarouselTicks = carousel.getTicks();
+    initialCarouselTicks = (int) carousel.getPosition();
 
     angleError = shooter.m_vision.getRobotAngle();
     distance = shooter.m_vision.getDistance();
@@ -223,7 +223,7 @@ public class Shoot extends CommandBase {
     if (Robot.isSimulation()) return (Robot.time() - startTime) > 2.0;
 
     // TODO: this should just check to see if the carousel has rotated 5 CAROUSEL_FIFTH_ROTATION_TICKS intervals
-    return (carousel.getTicks() - initialCarouselTicks) < -5 * Constants.CAROUSEL_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
+    return ((int) carousel.getPosition() - initialCarouselTicks) < -5 * Constants.CAROUSEL_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
   }
 
     public class ShooterPIDTuner {

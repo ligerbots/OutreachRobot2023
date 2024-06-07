@@ -9,7 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.CarouselCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.Shoot;
-import frc.robot.subsystems.Carousel;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Shooter;
@@ -29,7 +29,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   Vision m_vision = new Vision();
   Shooter m_shooter = new Shooter(m_vision, null);
-  Carousel m_carousel = new Carousel();
+  Turret m_carousel = new Turret();
   DriveTrain m_driveTrain = new DriveTrain();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed

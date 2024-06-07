@@ -19,6 +19,7 @@ public final class Constants {
   public static final int SHOOTER_FLUP_ID = 8; // Carousel to shooter wheel "FLUP"
   public static final int SHOOTER_SERVO_PWM_ID = 0; // Servo to control hood angle 
   public static final int SHOOTER_TURRET_SERVO_ID = 1; // TODO: Fix this
+  public static final int TURRET_MOTOR_CAN_ID = 9; //Carousel 550
   public static final double TURRET_ANGLE_ZERO_SETTING = 135.0;
   public static final double TURRET_ANGLE_COEFFICIENT = 180; // TODO: Fix this
   public static final double WARM_UP_RPM = 3000; // TODO: find a good value
