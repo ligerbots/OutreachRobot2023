@@ -44,24 +44,24 @@ import frc.robot.Robot;
 public class DriveTrain extends SubsystemBase {
   // check what we should add in constants and what in subsystems
 
-  private CANSparkMax leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
-  private CANSparkMax rightMotor = new CANSparkMax(Constants.RIGHT_MOTOR_CAN_ID, MotorType.kBrushless);
+  private CANSparkMax m_leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
+  private CANSparkMax m_rightMotor = new CANSparkMax(Constants.RIGHT_MOTOR_CAN_ID, MotorType.kBrushless);
   
 
   // public PIDController turnSpeedController;
-  public double turnOutput;
+  private double m_turnOutput;
 
-  DifferentialDrive robotDrive;
-  DifferentialDriveOdometry odometry;
+  DifferentialDrive m_robotDrive;
+  DifferentialDriveOdometry m_odometry;
 
-  Encoder leftEncoder; // = new Encoder(LEFT_ENCODER_PORTS);//(LOOK AT THIS!!)
-  Encoder rightEncoder; // = new Encoder(RIGHT_ENCODER_PORTS);
+  Encoder m_leftEncoder; // = new Encoder(LEFT_ENCODER_PORTS);//(LOOK AT THIS!!)
+  Encoder m_rightEncoder; // = new Encoder(RIGHT_ENCODER_PORTS);
   // private final static int[] LEFT_ENCODER_PORTS = new int[]{0, 1};
   // private final static int[] RIGHT_ENCODER_PORTS = new int[]{2,3};
 
-  AHRS m_navX; // (ASK LATER!!!)
+  AHRS m_navX; 
 
-  double limitedThrottle;
+  double m_limitedThrottle;
 
   /*
    * SIMULATION(CHECK IF WE NEED IT)
@@ -75,8 +75,6 @@ public class DriveTrain extends SubsystemBase {
    * private SimDouble gyroAngleSim;
    */
 
-  private int prevBallLocation = 0;
-  private int prevStartLocation = 10; // ASK WHAT THIS IS FOR!!!
 
   // PID
   private SparkMaxPIDController m_leftController;
@@ -90,44 +88,48 @@ public class DriveTrain extends SubsystemBase {
   private static final double DISTANCE_PER_PULSE = 0.00155852448; //
 
   public DriveTrain() {
-    m_leftController = leftMotor.getPIDController();
+    m_leftController = m_leftMotor.getPIDController();
     m_leftController.setP(K_P);
     m_leftController.setI(K_I);
     m_leftController.setD(K_D);
     m_leftController.setFF(K_FF);
-    m_rightController = rightMotor.getPIDController();
+    m_rightController = m_rightMotor.getPIDController();
     m_rightController.setP(K_P);
     m_rightController.setI(K_I);
     m_rightController.setD(K_D);
     m_rightController.setFF(K_FF);
 
-    robotDrive = new DifferentialDrive(leftMotor, rightMotor);
-    robotDrive.setSafetyEnabled(false);
+    m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+    m_robotDrive.setSafetyEnabled(false);
 
-    // navX = new AHRSSimWrapper(Port.kMXP, (byte) 200); //(ASK!!!!)
 
     // Set current limiting on drve train to prevent brown outs
-    Arrays.asList(leftMotor, rightMotor) // (ASK!!)
-        .forEach((CANSparkMax spark) -> spark.setSmartCurrentLimit(35));
+    //Arrays.asList(m_leftMotor, m_rightMotor) 
+        //.forEach((CANSparkMax spark) -> spark.setSmartCurrentLimit(35));
+    
+    m_leftMotor.setSmartCurrentLimit(35);
+    m_rightMotor.setSmartCurrentLimit(35);
+    
 
     // Set motors to brake when idle. We don't want the drive train to coast.
-    Arrays.asList(leftMotor, rightMotor)
-        .forEach((CANSparkMax spark) -> spark.setIdleMode(IdleMode.kBrake));
+    //Arrays.asList(m_leftMotor, m_rightMotor)
+        //.forEach((CANSparkMax spark) -> spark.setIdleMode(IdleMode.kBrake));
+
+    m_leftMotor.setIdleMode(IdleMode.kBrake);
+    m_rightMotor.setIdleMode(IdleMode.kBrake);
 
     // TODO determine real numbers to use here
     // rightLeader.setOpenLoopRampRate(0.0065);
     // leftLeader.setOpenLoopRampRate(0.0065);
 
-    //////////////////////////// ODOMETRY SET UP//////////////////////////////////
-    // (ASK!!!)
 
-    leftEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
-    rightEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
+    m_leftEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
+    m_rightEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
 
-    odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), DISTANCE_PER_PULSE, DISTANCE_PER_PULSE);
+    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), DISTANCE_PER_PULSE, DISTANCE_PER_PULSE);
 
     // turnSpeedController = new PIDController(0.015, 0.0001, 0.0, 0, navX, output
-    // -> this.turnOutput = output);
+    // -> this.m_turnOutput = output);
 
     /*
      * if (RobotBase.isSimulation()) {
@@ -141,8 +143,8 @@ public class DriveTrain extends SubsystemBase {
      * Constants.kWheelDiameterMeters / 2.0);
      * 
      * // The encoder and gyro angle sims let us set simulated sensor readings
-     * leftEncoderSim = new EncoderSim(leftEncoder);
-     * rightEncoderSim = new EncoderSim(rightEncoder);
+     * leftEncoderSim = new EncoderSim(m_leftEncoder);
+     * rightEncoderSim = new EncoderSim(m_rightEncoder);
      * 
      * // get the angle simulation variable
      * // SimDevice is found by name and index, like "name[index]"
@@ -159,7 +161,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return m_odometry.getPoseMeters();
   }
 
   public void setPose(Pose2d pose) {
@@ -179,56 +181,44 @@ public class DriveTrain extends SubsystemBase {
      * }
      */
     // The left and right encoders MUST be reset when odometry is reset
-    leftEncoder.reset();
-    rightEncoder.reset();
-    odometry.resetPosition(Rotation2d.fromDegrees(getGyroAngle()), 0.0, 0.0, pose); // (ASK!!)
+    m_leftEncoder.reset();
+    m_rightEncoder.reset();
+    m_odometry.resetPosition(Rotation2d.fromDegrees(getGyroAngle()), 0.0, 0.0, pose); 
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
-    leftMotor.setVoltage(-leftVolts);
-    rightMotor.setVoltage(rightVolts);// make sure right is negative becuase sides are opposite
-    robotDrive.feed();
+    m_leftMotor.setVoltage(-leftVolts);
+    m_rightMotor.setVoltage(rightVolts);// make sure right is negative becuase sides are opposite
+    m_robotDrive.feed();
   }
 
   public double getAverageEncoderDistance() {
-    return (leftEncoder.getDistance() + rightEncoder.getDistance()) / 2.0;
+    return (m_leftEncoder.getDistance() + m_rightEncoder.getDistance()) / 2.0;
   }
 
   public double getLeftEncoderDistance() {
-    return leftEncoder.getDistance();
+    return m_leftEncoder.getDistance();
   }
 
   public double getRightEncoderDistance() {
-    return rightEncoder.getDistance();
+    return m_rightEncoder.getDistance();
   }
 
   public double getHeading() {
-    return odometry.getPoseMeters().getRotation().getDegrees();
+    return m_odometry.getPoseMeters().getRotation().getDegrees();
   }
 
   private double getGyroAngle() {
     return Math.IEEEremainder(m_navX.getAngle(), 360) * -1; // -1 wa put here for unknown reason look in documatation
   }
 
-  public void resetOdometry(Pose2d pose) { // Same as setPose() but left here for compatibility
-    setPose(pose);
-    // old code as in master branch. leave here until tested
-    // resetEncoders();
-    // //resetHeading();
-    // odometry.resetPosition(pose, Rotation2d.fromDegrees(getGyroAngle()));
-
-    // if (RobotBase.isSimulation()) {
-    // fieldSim.setRobotPose(pose);
-    // }
-  }
-
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate());
+    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
   }
 
   @Override
   public void periodic() {
-    odometry.update(Rotation2d.fromDegrees(getGyroAngle()), leftEncoder.getDistance(), rightEncoder.getDistance());
+    m_odometry.update(Rotation2d.fromDegrees(getGyroAngle()), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
     SmartDashboard.putNumber("Heading", getHeading());
     SmartDashboard.putString("Pose", getPose().toString());
   }
@@ -242,9 +232,9 @@ public class DriveTrain extends SubsystemBase {
    * and gyro.
    * // We negate the right side so that positive voltages make the right side
    * // move forward.
-   * drivetrainSimulator.setInputs(-leftMotors.get() *
+   * drivetrainSimulator.setInputs(-m_leftMotor.get() *
    * RobotController.getBatteryVoltage(),
-   * rightMotors.get() * RobotController.getBatteryVoltage());
+   * m_rightMotors.get() * RobotController.getBatteryVoltage());
    * drivetrainSimulator.update(0.020);
    * 
    * leftEncoderSim.setDistance(drivetrainSimulator.getState(
@@ -271,15 +261,15 @@ public class DriveTrain extends SubsystemBase {
       if (Math.abs(rotate) < 0.1)
         rotate = 0;
     }
-    robotDrive.arcadeDrive(throttle, -rotate, squaredInputs);
+    m_robotDrive.arcadeDrive(throttle, -rotate, squaredInputs);
   }
 
   public int getLeftEncoderTicks() {
-    return leftEncoder.get();
+    return m_leftEncoder.get();
   }
 
   public int getRightEncoderTicks() {
-    return rightEncoder.get();
+    return m_rightEncoder.get();
   }
 
   public double turnSpeedCalc(double angleError) {
@@ -297,12 +287,12 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public double getPitch() {
-    return m_navX.getPitch(); // (ASK!!)
+    return m_navX.getPitch(); 
   }
 
   public void setIdleMode(IdleMode idleMode) {
     if (Robot.isReal()) {
-      Arrays.asList(leftMotor, rightMotor)
+      Arrays.asList(m_leftMotor, m_rightMotor)
           .forEach((CANSparkMax spark) -> spark.setIdleMode(idleMode));
     }
   }

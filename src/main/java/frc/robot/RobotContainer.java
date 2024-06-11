@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
+// import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.StartIntake;
@@ -27,11 +27,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Intake m_intake = new Intake();
   private final DriveTrain m_driveTrain = new DriveTrain();
 
-  private final XboxController m_controller = new XboxController(0);
+  private final CommandXboxController m_driverController = new CommandXboxController(0);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -50,10 +49,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    JoystickButton xboxA = new JoystickButton(m_controller, 1);
-    xboxA.onTrue(new StartIntake(m_intake, 0));
-
-    
+    m_driverController.a().onTrue(new StartIntake(m_intake, 0));
   }
 
   /**
@@ -61,8 +57,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+
+  /* public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return Autos.exampleAuto(m_exampleSubsystem);
-  }
+  } */
 }

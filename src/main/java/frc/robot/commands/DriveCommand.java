@@ -15,15 +15,16 @@ import frc.robot.subsystems.DriveTrain;
 public class DriveCommand extends CommandBase {
   /** Creates a new DriveCommand. */
 
-  DriveTrain driveTrain;
-  DoubleSupplier throttle;
-  DoubleSupplier turn;
+  DriveTrain m_driveTrain;
+  DoubleSupplier m_throttle;
+  DoubleSupplier m_turn;
 
   public DriveCommand(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
-    this.driveTrain = driveTrain;
-    this.throttle = throttle;
-    this.turn = turn;
+    m_driveTrain = driveTrain;
+    m_throttle = throttle;
+    m_turn = turn;
 
+    addRequirements(m_driveTrain);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -35,9 +36,7 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putNumber("left encoder", driveTrain.getLeftEncoderTicks());
-    SmartDashboard.putNumber("right encoder", driveTrain.getRightEncoderTicks());
-    driveTrain.allDrive(throttle.getAsDouble(), turn.getAsDouble(), false);
+    m_driveTrain.allDrive(m_throttle.getAsDouble(), m_turn.getAsDouble(), false);
   }
 
   // Called once the command ends or is interrupted.
