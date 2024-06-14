@@ -6,7 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.CarouselCommand;
+import frc.robot.commands.TurretCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.Shoot;
 import frc.robot.subsystems.Turret;
@@ -29,7 +29,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   Vision m_vision = new Vision();
   Shooter m_shooter = new Shooter(m_vision, null);
-  Turret m_carousel = new Turret();
+  Turret m_turret = new Turret();
   DriveTrain m_driveTrain = new DriveTrain();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -61,7 +61,7 @@ public class RobotContainer {
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
     m_driverController.x()
-      .onTrue(new Shoot(m_shooter, m_carousel, m_driveTrain, new CarouselCommand(), false));
+      .onTrue(new Shoot(m_shooter, m_turret, m_driveTrain, new TurretCommand(m_turret, 0), false));
   }
 
   /**

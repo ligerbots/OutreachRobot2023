@@ -28,7 +28,7 @@ public final class Constants {
   public static final int LEADER_RIGHT_CAN_ID = 8;
   public static final int FOLLOWER_LEFT_CAN_ID = 9; 
   public static final int FOLLOWER_RIGHT_CAN_ID = 11;
-  public static final int CAROUSEL_FIFTH_ROTATION_TICKS = 0;
+  public static final int TURRET_FIFTH_ROTATION_TICKS = 0;
 
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;

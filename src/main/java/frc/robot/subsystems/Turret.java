@@ -53,7 +53,7 @@ public class Turret extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  private void setTurretAngle(double angle) {
+  public void setTurretAngle(double angle) {
     m_pidController.setReference(angle, ControlType.kPosition);
   }
 

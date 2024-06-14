@@ -25,17 +25,17 @@ public class Shoot extends CommandBase {
   double startTime;
 
   Shooter shooter;
-  Turret carousel;
+  Turret turret;
   DriveTrain robotDrive;
   ShooterPIDTuner pidTuner;
   double shooterTargetSpeed;
 
   boolean startShooting;
 
-  CarouselCommand carouselCommand;
+  TurretCommand turretCommand;
   //DriveCommand driveCommand;
 
-  int initialCarouselTicks;
+  int initialTurretTicks;
 
   double stableRPMTime;
   boolean startedTimerFlag;
@@ -60,14 +60,14 @@ public class Shoot extends CommandBase {
     // private final MotorControllerGroup m_leftMotors = new MotorControllerGroup(m_leftLeader, m_leftFollower);
     private final MotorControllerGroup m_rightMotors = new MotorControllerGroup(m_rightLeader, m_rightFollower);
 
-  public Shoot(Shooter shooter, Turret carousel, DriveTrain robotDrive, CarouselCommand carouselCommand, /*DriveCommand driveCommand,*/ boolean rescheduleDriveCommand) {
+  public Shoot(Shooter shooter, Turret turret, DriveTrain robotDrive, TurretCommand turretCommand, /*DriveCommand driveCommand,*/ boolean rescheduleDriveCommand) {
     this.shooter = shooter;
     addRequirements(shooter);
-    this.carousel = carousel;
+    this.turret = turret;
     // The following statement will cause the CarouselCommand to be interrupted. This is good.
     // addRequirements(carousel);
     this.robotDrive = robotDrive;
-    this.carouselCommand = carouselCommand;
+    this.turretCommand = turretCommand;
     // System.out.println("Shooter.carouselCommand = " + this.carouselCommand);
     // this.driveCommand = driveCommand;
     this.rescheduleDriveCommand = rescheduleDriveCommand;
@@ -106,7 +106,7 @@ public class Shoot extends CommandBase {
 
   public void rapidFire() {
     shooter.shoot();
-    carousel.spin(1);
+    turret.spin(1);
   }
 
   // Called when the command is initially scheduled.
@@ -124,13 +124,13 @@ public class Shoot extends CommandBase {
     // driveCommand.cancel();
     startTime = Robot.time();
     shooter.m_vision.setMode(VisionMode.GOALFINDER);
-    carouselCommand.cancel();
+    turretCommand.cancel();
     currentControlMode = ControlMethod.ACQUIRING;
     //starts spinning up the shooter to hard-coded PID values
     pidTuner.spinUpTune();
     System.out.println("Initial NavX Heading: " + robotDrive.getHeading());
-    // store current carouselTick value
-    initialCarouselTicks = (int) carousel.getPosition();
+    // store current turretTick value
+    initialTurretTicks = (int) turret.getPosition();
 
     angleError = shooter.m_vision.getRobotAngle();
     distance = shooter.m_vision.getDistance();
@@ -196,7 +196,7 @@ public class Shoot extends CommandBase {
     hoodOnTarget = Robot.time() - startTime > 0.75;//shooter.hoodOnTarget(shooter.calculateShooterHood(distance));
 
     // !carousel.backwards will need to be removed when the shooter is re-written
-    if (speedOnTarget && hoodOnTarget && !carousel.backwards)
+    if (speedOnTarget && hoodOnTarget && !turret.backwards)
         rapidFire();
 
   }
@@ -206,10 +206,10 @@ public class Shoot extends CommandBase {
   public void end(boolean interrupted) {
     shooter.stopAll();
     shooter.m_vision.setMode(VisionMode.INTAKE);
-    carousel.spin(0.0);
-    carousel.resetBallCount();
-    carouselCommand.schedule();
-    System.out.println("Shooter: carouselCommand scheduled" + carouselCommand);
+    turret.spin(0.0);
+    turret.resetBallCount();
+    turretCommand.schedule();
+    System.out.println("Shooter: turretCommand scheduled" + turretCommand);
     //if (rescheduleDriveCommand) {
      // driveCommand.schedule();
     //}
@@ -222,8 +222,8 @@ public class Shoot extends CommandBase {
   public boolean isFinished() {
     if (Robot.isSimulation()) return (Robot.time() - startTime) > 2.0;
 
-    // TODO: this should just check to see if the carousel has rotated 5 CAROUSEL_FIFTH_ROTATION_TICKS intervals
-    return ((int) carousel.getPosition() - initialCarouselTicks) < -5 * Constants.CAROUSEL_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
+    // TODO: this should just check to see if the turret has rotated 5 TURRET_FIFTH_ROTATION_TICKS intervals
+    return ((int) turret.getPosition() - initialTurretTicks) < -5 * Constants.TURRET_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
   }
 
     public class ShooterPIDTuner {
