@@ -6,56 +6,64 @@ package frc.robot.subsystems;
 
 import java.util.Arrays;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+
 //import java.beans.Encoder;
+// import com.revrobotics.CANSparkMaxLowLevel;
+// import com.revrobotics.SparkMaxPIDController;
+// import com.revrobotics.CANSparkMax.ControlType;
+// import com.revrobotics.CANSparkMax.IdleMode;
+// import com.revrobotics.SparkMaxPIDController;
+// import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+// import edu.wpi.first.hal.SimDouble;
+// import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.math.Matrix;
+// import edu.wpi.first.math.Nat;
+// import edu.wpi.first.math.proto.Wpimath;
+// import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+// import edu.wpi.first.wpilibj.Encoder;
+// import edu.wpi.first.wpilibj.RobotBase;
+// import edu.wpi.first.wpilibj.SPI;
+// import edu.wpi.first.wpilibj.I2C.Port;
+//import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+//import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+// import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+// import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+// import edu.wpi.first.wpilibj.simulation.EncoderSim;
+// import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
+// import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+//import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 import com.kauailabs.navx.frc.AHRS; //(ASK later)
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.I2C.Port;
-//import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-//import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
-import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import edu.wpi.first.math.util.Units;
 
 public class DriveTrain extends SubsystemBase {
   // check what we should add in constants and what in subsystems
-
-  private CANSparkMax m_leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
-  private CANSparkMax m_rightMotor = new CANSparkMax(Constants.RIGHT_MOTOR_CAN_ID, MotorType.kBrushless);
+  // CANSparkMax(int, CANSparkLowLevel.MotorType)
+  private CANSparkMax m_leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, com.revrobotics.CANSparkLowLevel.MotorType.kBrushless);
+  private CANSparkMax m_rightMotor = new CANSparkMax(Constants.RIGHT_MOTOR_CAN_ID, com.revrobotics.CANSparkLowLevel.MotorType.kBrushless);
   
 
   // public PIDController turnSpeedController;
   private double m_turnOutput;
 
-  DifferentialDrive m_robotDrive;
-  DifferentialDriveOdometry m_odometry;
+  private DifferentialDrive m_robotDrive;
+  private DifferentialDriveOdometry m_odometry;
 
-  Encoder m_leftEncoder; // = new Encoder(LEFT_ENCODER_PORTS);//(LOOK AT THIS!!)
-  Encoder m_rightEncoder; // = new Encoder(RIGHT_ENCODER_PORTS);
+  private RelativeEncoder m_leftEncoder; // = new Encoder(LEFT_ENCODER_PORTS);//(LOOK AT THIS!!)
+  private RelativeEncoder m_rightEncoder; // = new Encoder(RIGHT_ENCODER_PORTS);
   // private final static int[] LEFT_ENCODER_PORTS = new int[]{0, 1};
   // private final static int[] RIGHT_ENCODER_PORTS = new int[]{2,3};
 
@@ -77,15 +85,17 @@ public class DriveTrain extends SubsystemBase {
 
 
   // PID
-  private SparkMaxPIDController m_leftController;
-  private SparkMaxPIDController m_rightController;
+  private SparkPIDController m_leftController;
+  private SparkPIDController m_rightController;
 
   private static double K_P = 1.0;
   private static double K_I = 0.0;
   private static double K_D = 0.0;
   private static double K_FF = 1.0;
 
-  private static final double DISTANCE_PER_PULSE = 0.00155852448; //
+
+  private static final double DRIVE_GEAR_REDUCTION = 1/19.527; //TODO: Double check number
+  private static final double METER_PER_REVOLUTION = (Units.inchesToMeters(8)*Math.PI) * DRIVE_GEAR_REDUCTION;
 
   public DriveTrain() {
     m_leftController = m_leftMotor.getPIDController();
@@ -115,18 +125,19 @@ public class DriveTrain extends SubsystemBase {
     //Arrays.asList(m_leftMotor, m_rightMotor)
         //.forEach((CANSparkMax spark) -> spark.setIdleMode(IdleMode.kBrake));
 
-    m_leftMotor.setIdleMode(IdleMode.kBrake);
-    m_rightMotor.setIdleMode(IdleMode.kBrake);
+    m_leftMotor.setIdleMode(com.revrobotics.CANSparkBase.IdleMode.kBrake);
+    m_rightMotor.setIdleMode(com.revrobotics.CANSparkBase.IdleMode.kBrake);
 
     // TODO determine real numbers to use here
     // rightLeader.setOpenLoopRampRate(0.0065);
     // leftLeader.setOpenLoopRampRate(0.0065);
 
 
-    m_leftEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
-    m_rightEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);
+    m_leftEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
+    m_rightEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
 
-    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), DISTANCE_PER_PULSE, DISTANCE_PER_PULSE);
+    //FIXME: Not sure what the second two arguments do, from looking at the docs they seem unnessary
+    m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), 0, 0);
 
     // turnSpeedController = new PIDController(0.015, 0.0001, 0.0, 0, navX, output
     // -> this.m_turnOutput = output);
@@ -181,8 +192,8 @@ public class DriveTrain extends SubsystemBase {
      * }
      */
     // The left and right encoders MUST be reset when odometry is reset
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
+    m_leftEncoder.setPosition(0);
+    m_rightEncoder.setPosition(0);
     m_odometry.resetPosition(Rotation2d.fromDegrees(getGyroAngle()), 0.0, 0.0, pose); 
   }
 
@@ -193,15 +204,15 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public double getAverageEncoderDistance() {
-    return (m_leftEncoder.getDistance() + m_rightEncoder.getDistance()) / 2.0;
+    return (getLeftEncoderDistance() + getRightEncoderDistance()) / 2.0;
   }
 
   public double getLeftEncoderDistance() {
-    return m_leftEncoder.getDistance();
+    return m_leftEncoder.getPosition();
   }
 
   public double getRightEncoderDistance() {
-    return m_rightEncoder.getDistance();
+    return m_rightEncoder.getPosition();
   }
 
   public double getHeading() {
@@ -213,12 +224,12 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
+    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getVelocity(), m_rightEncoder.getVelocity());
   }
 
   @Override
   public void periodic() {
-    m_odometry.update(Rotation2d.fromDegrees(getGyroAngle()), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+    m_odometry.update(Rotation2d.fromDegrees(getGyroAngle()), getLeftEncoderDistance(), getRightEncoderDistance());
     SmartDashboard.putNumber("Heading", getHeading());
     SmartDashboard.putString("Pose", getPose().toString());
   }
@@ -264,13 +275,13 @@ public class DriveTrain extends SubsystemBase {
     m_robotDrive.arcadeDrive(throttle, -rotate, squaredInputs);
   }
 
-  public int getLeftEncoderTicks() {
-    return m_leftEncoder.get();
-  }
+  // public int getLeftEncoderTicks() {
+  //   return m_leftEncoder.get();
+  // }
 
-  public int getRightEncoderTicks() {
-    return m_rightEncoder.get();
-  }
+  // public int getRightEncoderTicks() {
+  //   return m_rightEncoder.get();
+  // }
 
   public double turnSpeedCalc(double angleError) {
     if (Math.abs(angleError) > 60) {
