@@ -9,10 +9,10 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrain;
 
-public class DriveCommand extends CommandBase {
+public class DriveCommand extends Command {
   /** Creates a new DriveCommand. */
 
   DriveTrain m_driveTrain;
