@@ -15,21 +15,24 @@ import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.FollowerType;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+// import com.ctre.phoenix.motorcontrol.ControlMode;
+// import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+// import com.ctre.phoenix.motorcontrol.FollowerType;
+// import com.ctre.phoenix.motorcontrol.NeutralMode;
+// import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+// import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+// import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import frc.robot.Constants;
 
 
 public class Shooter extends TrapezoidProfileSubsystem {
-  WPI_TalonFX m_motorLeader, m_motorFollower;
+  TalonFX m_motorLeader, m_motorFollower;
   // the thing that actually does the shooting
-  WPI_TalonFX m_flup;
+  TalonFX m_flup;
   TalonFXSensorCollection m_shooterEncoder;
   Servo m_hoodServo, m_turretServo;
   TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double,Double[]>() {}; //set up lookup table for ranges
@@ -95,11 +98,11 @@ public class Shooter extends TrapezoidProfileSubsystem {
       SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ / SHOULDER_RADIAN_PER_UNIT),
       (SHOULDER_OFFSET_RADIAN-dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
 
-    m_motorLeader = new WPI_TalonFX(Constants.SHOOTER_ONE_ID);
-    m_motorFollower = new WPI_TalonFX(Constants.SHOOTER_TWO_ID);
+    m_motorLeader = new TalonFX(Constants.SHOOTER_ONE_ID);
+    m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
 
-    m_motorLeader.configFactoryDefault();
-    m_motorFollower.configFactoryDefault();
+    m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
+    m_motorFollower.getConfigurator().apply(new TalonFXConfiguration());
 
     m_shooterEncoder = m_motorLeader.getSensorCollection();
 
@@ -107,10 +110,18 @@ public class Shooter extends TrapezoidProfileSubsystem {
     // Set follower
     m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
 
-    m_motorLeader.config_kF(kPIDLoopIdx, SHOULDER_K_FF, kTimeoutMs);
-		m_motorLeader.config_kP(kPIDLoopIdx, SHOULDER_K_P, kTimeoutMs);
-		m_motorLeader.config_kI(kPIDLoopIdx, SHOULDER_K_I, kTimeoutMs);
-		m_motorLeader.config_kD(kPIDLoopIdx, SHOULDER_K_D, kTimeoutMs);
+
+    var talonFXConfigs = new TalonFXConfiguration();
+    // set slot 0 gains and leave every other config factory-default
+    var slot0Configs = talonFXConfigs.Slot0;
+    slot0Configs.kV = kTimeoutMs;
+    slot0Configs.kP = SHOULDER_K_P;
+    slot0Configs.kI = SHOULDER_K_I;
+    slot0Configs.kD = SHOULDER_K_D;
+
+    // apply all configs
+    m_motorLeader.getConfigurator().apply(talonFXConfigs, kTimeoutMs);
+
 
     // limits for motor leader and folower
     // always limit current to the values. Trigger limit = 0 so that it is always enforced.

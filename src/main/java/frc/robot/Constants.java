@@ -33,4 +33,11 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  
+  //INTAKE
+  public static final int INTAKE_MOTOR_CAN_ID = 0;
+
+  //DRIVETRAIN
+  public static final int RIGHT_MOTOR_CAN_ID = 0;
+  public static final int LEFT_MOTOR_CAN_ID = 0;
 }

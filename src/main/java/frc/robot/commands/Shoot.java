@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,10 +53,10 @@ public class Shoot extends CommandBase {
   ControlMethod currentControlMode;
   boolean rescheduleDriveCommand;
 
-    private WPI_TalonFX m_leftLeader = new WPI_TalonFX(Constants.LEADER_LEFT_CAN_ID);
-    private WPI_TalonFX m_leftFollower = new WPI_TalonFX(Constants.FOLLOWER_LEFT_CAN_ID);
-    private WPI_TalonFX m_rightLeader = new WPI_TalonFX(Constants.LEADER_RIGHT_CAN_ID);
-    private WPI_TalonFX m_rightFollower = new WPI_TalonFX(Constants.FOLLOWER_RIGHT_CAN_ID);
+    private TalonFX m_leftLeader = new TalonFX(Constants.LEADER_LEFT_CAN_ID);
+    private TalonFX m_leftFollower = new TalonFX(Constants.FOLLOWER_LEFT_CAN_ID);
+    private TalonFX m_rightLeader = new TalonFX(Constants.LEADER_RIGHT_CAN_ID);
+    private TalonFX m_rightFollower = new TalonFX(Constants.FOLLOWER_RIGHT_CAN_ID);
 
     // private final MotorControllerGroup m_leftMotors = new MotorControllerGroup(m_leftLeader, m_leftFollower);
     private final MotorControllerGroup m_rightMotors = new MotorControllerGroup(m_rightLeader, m_rightFollower);
@@ -75,6 +76,7 @@ public class Shoot extends CommandBase {
     pidTuner = new ShooterPIDTuner(shooter);
 
     // setup PID control for TalonFX
+      
         m_leftLeader.configFactoryDefault();
         m_leftLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
         m_leftLeader.set(ControlMode.Position,0);
