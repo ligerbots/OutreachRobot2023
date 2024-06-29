@@ -4,51 +4,43 @@
 
 package frc.robot.subsystems;
 
-
 import com.revrobotics.CANSparkMax;
 // import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.ExampleCommand;
-
-
-
 
 public class Intake extends SubsystemBase {
-  CANSparkMax intakeMotor;
-  /** Creates a new Intake. */
-  
-  public Intake() {
-    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
-    // intakeMotor.setIdleMode(IdleMode.kBrake);   
-  }
+    CANSparkMax intakeMotor;
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+    /** Creates a new Intake. */
 
-  public void run(double speed){
-    intakeMotor.set(-speed); 
-    // function to run the motor
-  }
+    public Intake() {
+        intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
+        // intakeMotor.setIdleMode(IdleMode.kBrake);
+    }
 
-  public void IntakeBalls(){
-    run(0.25); 
-    // experiment with the numbers
-    // showing speed of motor when intaking balls
-  }
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+    }
 
-  public void OutputBalls(){
-    run(-0.25); 
-    // experiment with the numbers
-    // showing the speed of motor when outputting balls
-  }
+    public void run(double speed) {
+        // WHY negative? better to invert the motor and have the speed match what we want
+        intakeMotor.set(-speed);
+        // function to run the motor
+    }
 
-  public Intake onTrue(ExampleCommand exampleCommand) {
-    return null;
-  }
+    public void IntakeBalls() {
+        run(0.25);
+        // experiment with the numbers
+        // showing speed of motor when intaking balls
+    }
 
+    public void OutputBalls() {
+        run(-0.25);
+        // experiment with the numbers
+        // showing the speed of motor when outputting balls
+    }
 }

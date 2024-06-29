@@ -60,7 +60,6 @@ public class RobotContainer {
         // The controls are for field-oriented driving:
         // Left stick Y axis -> forward and backwards movement
         // Right stick X axis -> rotation
-        // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
         return new Drive(
                 m_driveTrain,
                 () -> -m_driverController.getLeftY(),
