@@ -24,7 +24,6 @@ public class Shooter extends TrapezoidProfileSubsystem {
     TalonFX m_motorLeader, m_motorFollower;
     // the thing that actually does the shooting
     TalonFX m_flup;
-    TalonFXSensorCollection m_shooterEncoder;
     Servo m_hoodServo, m_turretServo;
     TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double, Double[]>() {
     }; // set up lookup table for ranges
@@ -96,8 +95,6 @@ public class Shooter extends TrapezoidProfileSubsystem {
         m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
         m_motorFollower.getConfigurator().apply(new TalonFXConfiguration());
 
-        m_shooterEncoder = m_motorLeader.getSensorCollection();
-
         m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs);
         // Set follower
         m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
@@ -131,7 +128,6 @@ public class Shooter extends TrapezoidProfileSubsystem {
 
         // Set the motor encoder and Position setpoint to the initialAngle from the
         // absolute encoder
-        m_shooterEncoder.setIntegratedSensorPosition(initialAngle / SHOULDER_RADIAN_PER_UNIT, 0);
 
         SmartDashboard.putNumber("shoulder/leaderCurrentLimit", LEADER_CURRENT_LIMIT);
         SmartDashboard.putNumber("shoulder/followCurrentLimit", FOLLOW_CURRENT_LIMIT);
@@ -279,7 +275,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
     }
 
     public double getSpeed() {
-        return -m_shooterEncoder.getIntegratedSensorVelocity();
+        //return -m_shooterEncoder.getIntegratedSensorVelocity();
+        return -m_motorLeader.getVelocity().getValueAsDouble();
     }
 
     public void prepareShooter(double distance) {
