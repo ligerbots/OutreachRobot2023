@@ -6,13 +6,15 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkPIDController;
+// import com.revrobotics.CANSparkMax;
+// import com.revrobotics.CANSparkMax.IdleMode;
+// import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkBase.ControlType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+// import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
@@ -25,7 +27,7 @@ public class Turret extends SubsystemBase {
     private final double RADIANS_PER_REVOLUTION = 2 * Math.PI * TURRET_GEAR_REDUCTION;
 
     // PID Stuff
-    private SparkMaxPIDController m_pidController;
+    private SparkPIDController m_pidController;
     private static double K_P = 1.0; // TODO: Tune
     private static double K_I = 0.0;
     private static double K_D = 0.0;

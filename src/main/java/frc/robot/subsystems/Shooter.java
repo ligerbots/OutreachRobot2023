@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.Constants;
@@ -90,7 +91,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
                 (SHOULDER_OFFSET_RADIAN - dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
 
         m_motorLeader = new TalonFX(Constants.SHOOTER_ONE_ID);
-        m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
+        m_motorFollower = new Follower(Constants.SHOOTER_ONE_ID, false)
+        // m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
 
         m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
         m_motorFollower.getConfigurator().apply(new TalonFXConfiguration());
