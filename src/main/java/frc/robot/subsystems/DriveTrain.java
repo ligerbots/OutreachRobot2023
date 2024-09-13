@@ -38,6 +38,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.kauailabs.navx.frc.AHRS; //(ASK later)
+import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
@@ -67,7 +68,7 @@ public class DriveTrain extends SubsystemBase {
   // private final static int[] LEFT_ENCODER_PORTS = new int[]{0, 1};
   // private final static int[] RIGHT_ENCODER_PORTS = new int[]{2,3};
 
-  AHRS m_navX; 
+  private final AHRS m_navX = new AHRS(Port.kMXP, (byte) 200);
 
   double m_limitedThrottle;
 
@@ -120,6 +121,9 @@ public class DriveTrain extends SubsystemBase {
     m_leftMotor.setSmartCurrentLimit(35);
     m_rightMotor.setSmartCurrentLimit(35);
     
+
+    m_leftEncoder = m_leftMotor.getEncoder();
+    m_rightEncoder = m_rightMotor.getEncoder();
 
     // Set motors to brake when idle. We don't want the drive train to coast.
     //Arrays.asList(m_leftMotor, m_rightMotor)

@@ -6,11 +6,13 @@ package frc.robot;
 
 // import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.StartIntake;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Intake;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +39,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    m_driveTrain.setDefaultCommand(getDriveCommand());
+
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -51,6 +56,28 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     m_driverController.a().onTrue(new StartIntake(m_intake, 0));
   }
+
+  public Command getDriveCommand() {
+    // The controls are for field-oriented driving:
+    // Left stick Y axis -> forward and backwards movement
+    // Right stick X axis -> rotation
+    // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
+    return new DriveCommand(
+            m_driveTrain,
+            () -> -modifyAxis(m_driverController.getLeftY()),
+            () -> -modifyAxis(m_driverController.getRightX()));
+}
+
+private static double modifyAxis(double value) {
+  // Deadband
+  value = MathUtil.applyDeadband(value, 0.05);
+
+  // Square the axis
+  value = Math.copySign(value * value, value);
+
+  return value;
+}
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
