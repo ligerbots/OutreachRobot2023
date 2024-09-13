@@ -17,12 +17,14 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.Follow;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.Constants;
 
 public class Shooter extends TrapezoidProfileSubsystem {
-    TalonFX m_motorLeader, m_motorFollower;
+    TalonFX m_motorLeader;
+    Follower m_motorFollower;
     // the thing that actually does the shooting
     TalonFX m_flup;
     Servo m_hoodServo, m_turretServo;
@@ -91,7 +93,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
                 (SHOULDER_OFFSET_RADIAN - dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
 
         m_motorLeader = new TalonFX(Constants.SHOOTER_ONE_ID);
-        m_motorFollower = new Follower(Constants.SHOOTER_ONE_ID, false)
+        m_motorFollower = new Follower(Constants.SHOOTER_ONE_ID, true); //Please test this carefully! I'm pretty sure this makes sense based on the docs and mechanics, but I could be wrong.
+        m_motorFollower.withUpdateFreqHz(30.0); //I don't know if this is unrealistic
         // m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
 
         m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
