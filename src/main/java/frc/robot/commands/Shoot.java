@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Turret;
@@ -16,7 +16,7 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision.VisionMode;
 
-public class Shoot extends CommandBase {
+public class Shoot extends Command {
 
   /**
    * Creates a new ShooterCommand.
