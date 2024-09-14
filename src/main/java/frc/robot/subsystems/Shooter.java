@@ -7,22 +7,20 @@ package frc.robot.subsystems;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants;
 
-public class Shooter extends TrapezoidProfileSubsystem {
-    TalonFX m_motorLeader, m_motorFollower;
+public class Shooter extends SubsystemBase {
+    TalonFX m_shooter;
     // the thing that actually does the shooting
     TalonFX m_flup;
     Servo m_hoodServo, m_turretServo;
@@ -36,104 +34,53 @@ public class Shooter extends TrapezoidProfileSubsystem {
     public int m_hoodAdjustment = 0;
     public double m_angleErrorAfterTurn = 0;
 
-    // private static final double SHOULDER_MAX_ANGLE = Math.toRadians(30.0);
-    // private static final double SHOULDER_MIN_ANGLE = Math.toRadians(-65.0);
-
-    public static final double SHOULDER_ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0);
-
-    private static final double LEADER_CURRENT_LIMIT = 40.0;
-    private static final double FOLLOW_CURRENT_LIMIT = 40.0;
+    private static final double SHOOTER_STATOR_CURRENT_LIMIT = 40.0;
 
     // TODO: The following constants came from the 2022 robot.
     // These need to be set for this robot.
 
-    // All units are MKS with angles in Radians
-
-    // Feedforward constants for the shoulder
-    // private static final double SHOULDER_KS = 0.182; // TODO: This may need to be
-    // tuned
-    // The following constants are computed from https://www.reca.lc/arm
-    // private static final double SHOULDER_KG = 0.09; // V
-    // private static final double SHOULDER_KV = 6.60; // V*sec/rad
-    // private static final double SHOULDER_KA = 0.01; // V*sec^2/rad
-
-    // Constants to limit the shoulder rotation speed
-    private static final double SHOULDER_MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(300.0); // 120 deg/sec
-    private static final double SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(450.0); // 120 deg/sec^2
-
-    private static final double SHOULDER_POSITION_OFFSET = 62.0 / 360.0;
-    private static final double SHOULDER_OFFSET_RADIAN = SHOULDER_POSITION_OFFSET * 2 * Math.PI;
-
-    // The Shoulder gear ratio is 288, but let's get it exactly.
-    // private static final double SHOULDER_GEAR_RATIO = (84.0 /12.0) * (84.0 /
-    // 18.0) * (84.0 / 26.0) * (60.0 / 22.0);
-    private static final double SHOULDER_GEAR_RATIO = (84.0 / 12.0) * (84.0 / 18.0) * (70.0 / 40.0) * (60.0 / 22.0);
-
     // PID Constants for the shoulder PID controller
-    // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double LEADER_K_P = 0.15;
-    private static final double LEADER_K_I = 0;
-    private static final double LEADER_K_D = 0;
-    private static final double LEADER_K_FF = 0;
-    private static final int kPIDLoopIdx = 0;
-    private static final int kTimeoutMs = 0;
+    private static final double SHOOTER_K_S = 0.1;
+    private static final double SHOOTER_K_V = 0.11;
+    private static final double SHOOTER_K_P = 0.12;
+    private static final double SHOOTER_K_I = 0.0;
+    private static final double SHOOTER_K_D = 0.0;
+    private static final int kTimeoutS = 0;
     private boolean m_coastMode = false;
-
-    // The TalonFX, the integrated motor controller for the Falcon, uses ticks as
-    // it's noative unit.
-    // There are 2048 ticks per revolution. Need to account for the gear ratio.
-    private static final double SHOULDER_RADIAN_PER_UNIT = 2 * Math.PI / (2048 * SHOULDER_GEAR_RATIO);
 
     // constructor
     public Shooter(DutyCycleEncoder dutyCycleEncoder) {
-        super(new TrapezoidProfile.Constraints(SHOULDER_MAX_VEL_RADIAN_PER_SEC / SHOULDER_RADIAN_PER_UNIT,
-                SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ / SHOULDER_RADIAN_PER_UNIT),
-                (SHOULDER_OFFSET_RADIAN - dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
+        m_shooter = new TalonFX(Constants.SHOOTER_ONE_ID);
+        m_shooter.getConfigurator().apply(new TalonFXConfiguration());
 
-        m_motorLeader = new TalonFX(Constants.SHOOTER_ONE_ID);
-        m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
-        // get the thing to follow the other thing
-        m_motorFollower.setControl(new Follower(m_motorLeader.getDeviceID(), false));
+        // m_shooter.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs)
 
-        m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
-        m_motorFollower.getConfigurator().apply(new TalonFXConfiguration());
-
-        // m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs)
-        // Set follower
-        // m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
-
+        // PID Configs
         var talonFXConfigs = new TalonFXConfiguration();
         // set slot 0 gains and leave every other config factory-default
         var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kV = kTimeoutMs;
-        slot0Configs.kP = LEADER_K_P;
-        slot0Configs.kI = LEADER_K_I;
-        slot0Configs.kD = LEADER_K_D;
+        slot0Configs.kS = SHOOTER_K_S;
+        slot0Configs.kV = SHOOTER_K_V;
+        slot0Configs.kP = SHOOTER_K_P;
+        slot0Configs.kI = SHOOTER_K_I;
+        slot0Configs.kD = SHOOTER_K_D;
 
-        // apply all configs
-        m_motorLeader.getConfigurator().apply(talonFXConfigs, kTimeoutMs);
+        m_shooter.getConfigurator().apply(talonFXConfigs, kTimeoutS);
 
-        // limits for motor leader and folower
-        // always limit current to the values. Trigger limit = 0 so that it is always
-        // enforced.
-        m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, LEADER_CURRENT_LIMIT, 0, 0));
-        m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, FOLLOW_CURRENT_LIMIT, 0, 0));
+        // Supply current limiting
+        CurrentLimitsConfigs shooterCurrentLimitConfigs = new CurrentLimitsConfigs();
+        shooterCurrentLimitConfigs.StatorCurrentLimit = SHOOTER_STATOR_CURRENT_LIMIT;
+        shooterCurrentLimitConfigs.StatorCurrentLimitEnable = true;
 
-        m_dutyEncoder = dutyCycleEncoder;
+        m_shooter.getConfigurator().apply(shooterCurrentLimitConfigs);
 
-        // Encoder distance is in radians
-        m_dutyEncoder.setDistancePerRotation(2 * Math.PI);
-        m_dutyEncoder.setPositionOffset(SHOULDER_POSITION_OFFSET);
-
-        double initialAngle = -m_dutyEncoder.getDistance();
         // SmartDashboard.putNumber("shoulder/initAngle",
         // Units.radiansToDegrees(initialAngle));
 
         // Set the motor encoder and Position setpoint to the initialAngle from the
         // absolute encoder
 
-        SmartDashboard.putNumber("shoulder/leaderCurrentLimit", LEADER_CURRENT_LIMIT);
-        SmartDashboard.putNumber("shoulder/followCurrentLimit", FOLLOW_CURRENT_LIMIT);
+        SmartDashboard.putNumber("shoulder/leaderCurrentLimit", SHOOTER_STATOR_CURRENT_LIMIT);
         // m_motorLeader.setSelectedSensorPosition(-m_Duty_Encoder.getDistance());
         // m_motorLeader.setSelectedSensorPosition(m_encoder.getIntegratedSensorPosition());
         // m_motorLeader.setSelectedSensorPosition(initialAngle /
@@ -241,31 +188,28 @@ public class Shooter extends TrapezoidProfileSubsystem {
         SmartDashboard.putNumber("shooter/F", 6.6774 * 0.00001);
     }
 
-    private void setMotorMode(NeutralMode coast) {
-    }
-
     // called a lot
     @Override
     public void periodic() {
         SmartDashboard.putNumber("shooter/RPM", getSpeed());
-        SmartDashboard.putNumber("shooter/current", m_motorFollower.getSupplyCurrent());
-        SmartDashboard.putNumber("shooter/distance", m_vision.getDistance());
+        SmartDashboard.putNumber("shooter/current", m_shooter.getSupplyCurrent().getValueAsDouble());
+        // SmartDashboard.putNumber("shooter/distance", m_vision.getDistance());
         SmartDashboard.putNumber("shooter/Hood_Adjustment", m_hoodAdjustment);
         SmartDashboard.putNumber("shooter/RPM_Adjustment", m_rpmAdjustment);
-        SmartDashboard.putNumber("shooter/Output_Voltage", m_motorFollower.getMotorOutputVoltage());
+        SmartDashboard.putNumber("shooter/Output_Voltage", m_shooter.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("shooter/turretAngleRaw", m_turretServo.getAngle());
     }
 
     public void setCoastMode(boolean coastMode) {
         if (coastMode) {
-            m_motorLeader.setNeutralMode(NeutralMode.Coast);
-            m_motorLeader.stopMotor();
+            m_shooter.setNeutralMode(NeutralModeValue.Coast);
+            m_shooter.stopMotor();
         } else
-            m_motorLeader.setNeutralMode(NeutralMode.Brake);
+            m_shooter.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public double getVoltage() {
-        return m_motorFollower.getBusVoltage();
+        return m_shooter.getSupplyVoltage().getValueAsDouble();
     }
 
     public void setHood(double angle) {
@@ -281,7 +225,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
 
     public double getSpeed() {
         //return -m_shooterEncoder.getIntegratedSensorVelocity();
-        return -m_motorLeader.getVelocity().getValueAsDouble();
+        return -m_shooter.getVelocity().getValueAsDouble();
     }
 
     public void prepareShooter(double distance) {
@@ -364,8 +308,8 @@ public class Shooter extends TrapezoidProfileSubsystem {
     public boolean speedOnTarget(final double targetVelocity, final double percentAllowedError) {
         final double max = targetVelocity * (1.0 + (percentAllowedError / 100.0));
         final double min = targetVelocity * (1.0 - (percentAllowedError / 100.0));
-        return m_shooterEncoder.getIntegratedSensorVelocity() > max
-                && m_shooterEncoder.getIntegratedSensorVelocity() < min; // this is wack cause it's negative
+        return m_shooter.getVelocity().getValueAsDouble() > max
+                && m_shooter.getVelocity().getValueAsDouble() < min; // this is wack cause it's negative
     }
 
     public boolean hoodOnTarget(final double targetAngle) {
@@ -373,11 +317,15 @@ public class Shooter extends TrapezoidProfileSubsystem {
         return m_hoodServo.getAngle() > targetAngle - 0.5 && m_hoodServo.getAngle() < targetAngle + 0.5;
     }
 
-    public void calibratePID(final double p, final double i, final double d, final double f) {
-        m_motorLeader.config_kP(0, p);
-        m_motorLeader.config_kI(0, i);
-        m_motorLeader.config_kD(0, d);
-        m_motorLeader.config_kF(0, f);
+    public void calibratePID(final double p, final double i, final double d) {
+        var talonFXConfigs = new TalonFXConfiguration();
+        var slot0Configs = talonFXConfigs.Slot0;
+        slot0Configs.kS = SHOOTER_K_S;
+        slot0Configs.kV = SHOOTER_K_V;
+        slot0Configs.kP = p;
+        slot0Configs.kI = i;
+        slot0Configs.kD = d;
+        m_shooter.getConfigurator().apply(talonFXConfigs, kTimeoutS);
     }
 
     public void stopAll() {
@@ -423,11 +371,4 @@ public class Shooter extends TrapezoidProfileSubsystem {
             setTurret(Constants.TURRET_ANGLE_ZERO_SETTING);
         }
     }
-
-    @Override
-    protected void useState(State state) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'useState'");
-    }
-
 }

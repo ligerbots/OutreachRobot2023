@@ -1,12 +1,8 @@
 package frc.robot.commands;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -25,15 +21,15 @@ public class Shoot extends Command {
   double waitTime;
   double startTime;
 
-  Shooter shooter;
-  Turret turret;
-  DriveTrain robotDrive;
+  Shooter m_shooter;
+  Turret m_turret;
+  DriveTrain m_robotDrive;
   ShooterPIDTuner pidTuner;
   double shooterTargetSpeed;
 
   boolean startShooting;
 
-  TurretCommand turretCommand;
+  TurretCommand m_turretCommand;
   //DriveCommand driveCommand;
 
   int initialTurretTicks;
@@ -53,22 +49,23 @@ public class Shoot extends Command {
   ControlMethod currentControlMode;
   boolean rescheduleDriveCommand;
 
-    private TalonFX m_leftLeader = new TalonFX(Constants.LEADER_LEFT_CAN_ID);
-    private TalonFX m_leftFollower = new TalonFX(Constants.FOLLOWER_LEFT_CAN_ID);
-    private TalonFX m_rightLeader = new TalonFX(Constants.LEADER_RIGHT_CAN_ID);
-    private TalonFX m_rightFollower = new TalonFX(Constants.FOLLOWER_RIGHT_CAN_ID);
+  // I don't know what these are doing here, but I don't think they're relevant. I may delete it if I confirm that this is unusable.
+  // private TalonFX m_leftLeader = new TalonFX(Constants.LEADER_LEFT_CAN_ID);
+  // private TalonFX m_leftFollower = new TalonFX(Constants.FOLLOWER_LEFT_CAN_ID);
+  // private TalonFX m_rightLeader = new TalonFX(Constants.LEADER_RIGHT_CAN_ID);
+  // private TalonFX m_rightFollower = new TalonFX(Constants.FOLLOWER_RIGHT_CAN_ID);
 
-    // private final MotorControllerGroup m_leftMotors = new MotorControllerGroup(m_leftLeader, m_leftFollower);
-    private final MotorControllerGroup m_rightMotors = new MotorControllerGroup(m_rightLeader, m_rightFollower);
+  // private final MotorControllerGroup m_leftMotors = new MotorControllerGroup(m_leftLeader, m_leftFollower);
+  // private final MotorControllerGroup m_rightMotors = new MotorControllerGroup(m_rightLeader, m_rightFollower);
 
   public Shoot(Shooter shooter, Turret turret, DriveTrain robotDrive, TurretCommand turretCommand, /*DriveCommand driveCommand,*/ boolean rescheduleDriveCommand) {
-    this.shooter = shooter;
+    m_shooter = shooter;
     addRequirements(shooter);
-    this.turret = turret;
+    m_turret = turret;
     // The following statement will cause the CarouselCommand to be interrupted. This is good.
     // addRequirements(carousel);
-    this.robotDrive = robotDrive;
-    this.turretCommand = turretCommand;
+    m_robotDrive = robotDrive;
+    m_turretCommand = turretCommand;
     // System.out.println("Shooter.carouselCommand = " + this.carouselCommand);
     // this.driveCommand = driveCommand;
     this.rescheduleDriveCommand = rescheduleDriveCommand;
@@ -77,38 +74,39 @@ public class Shoot extends Command {
 
     // setup PID control for TalonFX
       
-        m_leftLeader.configFactoryDefault();
-        m_leftLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
-        m_leftLeader.set(ControlMode.Position,0);
-        m_leftLeader.config_kP(0, 50);
-        m_leftLeader.config_kI(0, 0);
-        m_leftLeader.config_kD(0, 0);
-        m_leftLeader.config_kF(0, 0);
-        m_leftLeader.setSensorPhase(false);
+    /*m_leftLeader.configFactoryDefault();
+    m_leftLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
+    m_leftLeader.set(ControlMode.Position,0);
+    m_leftLeader.config_kP(0, 50);
+    m_leftLeader.config_kI(0, 0);
+    m_leftLeader.config_kD(0, 0);
+    m_leftLeader.config_kF(0, 0);
+    m_leftLeader.setSensorPhase(false);
 
-        m_rightLeader.configFactoryDefault();
-        m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
-        m_rightLeader.set(ControlMode.Position,0);
-        m_rightLeader.config_kP(0, 50);
-        m_rightLeader.config_kI(0, 0);
-        m_rightLeader.config_kD(0, 0);
-        m_rightLeader.config_kF(0, 0);
-        m_rightLeader.setSensorPhase(true);
+    m_rightLeader.configFactoryDefault();
+    m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
+    m_rightLeader.set(ControlMode.Position,0);
+    m_rightLeader.config_kP(0, 50);
+    m_rightLeader.config_kI(0, 0);
+    m_rightLeader.config_kD(0, 0);
+    m_rightLeader.config_kF(0, 0);
+    m_rightLeader.setSensorPhase(true);
         
-        m_rightMotors.setInverted(true);
-        setMotorMode(NeutralMode.Coast);
+    m_rightMotors.setInverted(true);
+
+    setMotorMode(NeutralModeValue.Coast);*/
   }
 
-  public void setMotorMode(NeutralMode m) {
+  /*public void setMotorMode(NeutralModeValue m) {
     m_leftLeader.setNeutralMode(m);
     m_leftFollower.setNeutralMode(m);
     m_rightLeader.setNeutralMode(m);
     m_rightFollower.setNeutralMode(m); 
-  }
+  }*/
 
   public void rapidFire() {
-    shooter.shoot();
-    turret.spin(1);
+    m_shooter.shoot();
+    m_turret.spin(1);
   }
 
   // Called when the command is initially scheduled.
@@ -125,17 +123,17 @@ public class Shoot extends Command {
 
     // driveCommand.cancel();
     startTime = Robot.time();
-    shooter.m_vision.setMode(VisionMode.GOALFINDER);
-    turretCommand.cancel();
+    m_shooter.m_vision.setMode(VisionMode.GOALFINDER);
+    m_turretCommand.cancel();
     currentControlMode = ControlMethod.ACQUIRING;
     //starts spinning up the shooter to hard-coded PID values
     pidTuner.spinUpTune();
-    System.out.println("Initial NavX Heading: " + robotDrive.getHeading());
+    System.out.println("Initial NavX Heading: " + m_robotDrive.getHeading());
     // store current turretTick value
-    initialTurretTicks = (int) turret.getPosition();
+    initialTurretTicks = (int) m_turret.getPosition();
 
-    angleError = shooter.m_vision.getRobotAngle();
-    distance = shooter.m_vision.getDistance();
+    angleError = m_shooter.m_vision.getRobotAngle();
+    distance = m_shooter.m_vision.getDistance();
 
     currentControlMode = ControlMethod.SPIN_UP;
     startedTimerFlag = false;
@@ -154,17 +152,17 @@ public class Shoot extends Command {
   @Override
   public void execute() {
     if (!foundTarget) {
-      distance = shooter.m_vision.getDistance();
+      distance = m_shooter.m_vision.getDistance();
       if (distance != 0.0) {
         foundTarget = true;
         currentControlMode = ControlMethod.SPIN_UP;
         // We found the target. Set the turret angle based on the vision system before
         // we spin up the shooter
-        angleError = shooter.m_vision.getRobotAngle();
+        angleError = m_shooter.m_vision.getRobotAngle();
         // angleError = 0.0;
-        shooter.setTurretAdjusted(angleError);
-        shooterTargetSpeed = -shooter.calculateShooterSpeed(distance);  
-        shooter.prepareShooter(distance);   
+        m_shooter.setTurretAdjusted(angleError);
+        shooterTargetSpeed = -m_shooter.calculateShooterSpeed(distance);  
+        m_shooter.prepareShooter(distance);   
       }   
     }
 
@@ -172,7 +170,7 @@ public class Shoot extends Command {
 
     if (currentControlMode == ControlMethod.SPIN_UP){ 
 
-      if (shooter.speedOnTarget(shooterTargetSpeed, 15)) {
+      if (m_shooter.speedOnTarget(shooterTargetSpeed, 15)) {
         if (startedTimerFlag) {
           if (Robot.time() - stableRPMTime > 0.2) {
             currentControlMode = ControlMethod.HOLD;
@@ -194,11 +192,11 @@ public class Shoot extends Command {
     }
 
   
-    speedOnTarget = (shooter.speedOnTarget(shooterTargetSpeed, 8) && currentControlMode == ControlMethod.HOLD) || Robot.time() - startTime > 3.5; //TODO: May need to adjust acceptable error
+    speedOnTarget = (m_shooter.speedOnTarget(shooterTargetSpeed, 8) && currentControlMode == ControlMethod.HOLD) || Robot.time() - startTime > 3.5; //TODO: May need to adjust acceptable error
     hoodOnTarget = Robot.time() - startTime > 0.75;//shooter.hoodOnTarget(shooter.calculateShooterHood(distance));
 
     // !carousel.backwards will need to be removed when the shooter is re-written
-    if (speedOnTarget && hoodOnTarget && !turret.backwards)
+    if (speedOnTarget && hoodOnTarget && !m_turret.backwards)
         rapidFire();
 
   }
@@ -206,12 +204,12 @@ public class Shoot extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.stopAll();
-    shooter.m_vision.setMode(VisionMode.INTAKE);
-    turret.spin(0.0);
-    turret.resetBallCount();
-    turretCommand.schedule();
-    System.out.println("Shooter: turretCommand scheduled" + turretCommand);
+    m_shooter.stopAll();
+    m_shooter.m_vision.setMode(VisionMode.INTAKE);
+    m_turret.spin(0.0);
+    m_turret.resetBallCount();
+    m_turretCommand.schedule();
+    System.out.println("Shooter: turretCommand scheduled" + m_turretCommand);
     //if (rescheduleDriveCommand) {
      // driveCommand.schedule();
     //}
@@ -225,35 +223,33 @@ public class Shoot extends Command {
     if (Robot.isSimulation()) return (Robot.time() - startTime) > 2.0;
 
     // TODO: this should just check to see if the turret has rotated 5 TURRET_FIFTH_ROTATION_TICKS intervals
-    return ((int) turret.getPosition() - initialTurretTicks) < -5 * Constants.TURRET_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
+    return ((int) m_turret.getPosition() - initialTurretTicks) < -5 * Constants.TURRET_FIFTH_ROTATION_TICKS || (distance == 0.0 && Robot.time() - startTime > 2.0);
   }
 
-    public class ShooterPIDTuner {
-        private double p,i,d,f;
-        private Shooter shooter;
-        public ShooterPIDTuner(Shooter shooter){
-            this.shooter = shooter;
-    
-        }
-    
-        public void spinUpTune(){
-            shooter.calibratePID(0.000145, 1e-8, 0, 6.6774 * 1e-5);
-        }
-    
-        public void HoldTune(){
-            getPIDFromDashBoard();
-            setPID();
-        }
-    
-        public void getPIDFromDashBoard(){
-            p = SmartDashboard.getNumber("shooter/P", 0.000145);
-            i = SmartDashboard.getNumber("shooter/I",1e-8);
-            d = SmartDashboard.getNumber("shooter/D", 0);
-            f = SmartDashboard.getNumber("shooter/F", 6.6774 * 1e-5);
-        }
-    
-        public void setPID(){
-            shooter.calibratePID(p, i, d, f);
-        }
+  public class ShooterPIDTuner {
+    private double p,i,d;
+    private Shooter shooter;
+    public ShooterPIDTuner(Shooter shooter){
+      this.shooter = shooter;
     }
+    
+    public void spinUpTune(){
+      shooter.calibratePID(0.000145, 1e-8, 0.0);
+    }
+    
+    public void HoldTune(){
+      getPIDFromDashBoard();
+      setPID();
+    }
+    
+    public void getPIDFromDashBoard(){
+      p = SmartDashboard.getNumber("shooter/P", 0.000145);
+      i = SmartDashboard.getNumber("shooter/I",1e-8);
+      d = SmartDashboard.getNumber("shooter/D", 0);
+    }
+    
+    public void setPID(){
+      shooter.calibratePID(p, i, d);
+    }
+  }
 }

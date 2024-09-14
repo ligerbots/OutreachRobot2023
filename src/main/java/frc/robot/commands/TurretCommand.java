@@ -4,10 +4,10 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret;
 
-public class TurretCommand extends CommandBase {
+public class TurretCommand extends Command {
   private Turret m_turret;
   private double m_angle;
   /** Creates a new CarouselCommand. */
