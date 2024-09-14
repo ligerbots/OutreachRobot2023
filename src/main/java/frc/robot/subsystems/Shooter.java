@@ -17,14 +17,12 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.Follow;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.Constants;
 
 public class Shooter extends TrapezoidProfileSubsystem {
-    TalonFX m_motorLeader;
-    Follower m_motorFollower;
+    TalonFX m_motorLeader, m_motorFollower;
     // the thing that actually does the shooting
     TalonFX m_flup;
     Servo m_hoodServo, m_turretServo;
@@ -73,10 +71,10 @@ public class Shooter extends TrapezoidProfileSubsystem {
 
     // PID Constants for the shoulder PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double SHOULDER_K_P = 0.15;
-    private static final double SHOULDER_K_I = 0;
-    private static final double SHOULDER_K_D = 0;
-    private static final double SHOULDER_K_FF = 0;
+    private static final double LEADER_K_P = 0.15;
+    private static final double LEADER_K_I = 0;
+    private static final double LEADER_K_D = 0;
+    private static final double LEADER_K_FF = 0;
     private static final int kPIDLoopIdx = 0;
     private static final int kTimeoutMs = 0;
     private boolean m_coastMode = false;
@@ -93,24 +91,24 @@ public class Shooter extends TrapezoidProfileSubsystem {
                 (SHOULDER_OFFSET_RADIAN - dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOULDER_RADIAN_PER_UNIT);
 
         m_motorLeader = new TalonFX(Constants.SHOOTER_ONE_ID);
-        m_motorFollower = new Follower(Constants.SHOOTER_ONE_ID, true); //Please test this carefully! I'm pretty sure this makes sense based on the docs and mechanics, but I could be wrong.
-        m_motorFollower.withUpdateFreqHz(30.0); //I don't know if this is unrealistic
-        // m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
+        m_motorFollower = new TalonFX(Constants.SHOOTER_TWO_ID);
+        // get the thing to follow the other thing
+        m_motorFollower.setControl(new Follower(m_motorLeader.getDeviceID(), false));
 
         m_motorLeader.getConfigurator().apply(new TalonFXConfiguration());
         m_motorFollower.getConfigurator().apply(new TalonFXConfiguration());
 
-        m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs);
+        // m_motorLeader.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs)
         // Set follower
-        m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
+        // m_motorFollower.follow(m_motorLeader, FollowerType.PercentOutput);
 
         var talonFXConfigs = new TalonFXConfiguration();
         // set slot 0 gains and leave every other config factory-default
         var slot0Configs = talonFXConfigs.Slot0;
         slot0Configs.kV = kTimeoutMs;
-        slot0Configs.kP = SHOULDER_K_P;
-        slot0Configs.kI = SHOULDER_K_I;
-        slot0Configs.kD = SHOULDER_K_D;
+        slot0Configs.kP = LEADER_K_P;
+        slot0Configs.kI = LEADER_K_I;
+        slot0Configs.kD = LEADER_K_D;
 
         // apply all configs
         m_motorLeader.getConfigurator().apply(talonFXConfigs, kTimeoutMs);
@@ -162,15 +160,17 @@ public class Shooter extends TrapezoidProfileSubsystem {
         // setAngle(m_encoder.getIntegratedSensorPosition() * SHOULDER_RADIAN_PER_UNIT);
 
         // We want motor2 to be master and motor1 and 3 follow the speed of motor2
-        m_motorLeader.follow(m_motorFollower);
+        // m_motorLeader.follow(m_motorFollower);
         // motor3.follow(motor2);
 
-        m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
-        m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
+        // I think this has been done already
+        // m_motorLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
+        // m_motorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 0, 0));
         // motor3.setSmartCurrentLimit(40);
 
         // setup PID control for TalonFX
-        m_motorLeader.configFactoryDefault();
+        // Already did this
+        /*m_motorLeader.configFactoryDefault();
         m_motorLeader.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
         m_motorLeader.set(ControlMode.Position, 0);
         m_motorLeader.config_kP(0, 50);
@@ -179,7 +179,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
         m_motorLeader.config_kF(0, 0);
         m_motorLeader.setSensorPhase(false);
 
-        setMotorMode(NeutralMode.Coast);
+        setMotorMode(NeutralMode.Coast);*/
 
         // m_leftEncoder.setDistancePerPulse(Constants.ENCODER_DISTANCE_PER_PULSE);
         // m_rightEncoder.setDistancePerPulse(Constants.ENCODER_DISTANCE_PER_PULSE);
