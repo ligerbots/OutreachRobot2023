@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
@@ -17,31 +16,31 @@ import frc.robot.Constants;
 import frc.robot.commands.ExampleCommand;
 
 public class Transfer extends SubsystemBase {
-  private CANSparkMax m_transferMotor;
-  private final double m_speed = 0.30; //TODO: find working voltage values
-  
-  /** Creates a new Intake. */
-  public Transfer() {
-    m_transferMotor = new CANSparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
-    m_transferMotor.setIdleMode(IdleMode.kBrake);
-    m_transferMotor.setInverted(true);
-  }
+    private CANSparkMax m_transferMotor;
+    private final double m_speed = 0.30; // TODO: find working voltage values
 
-  //Transfer methods
-  public void run() {
-    m_transferMotor.set(m_speed);
-  }
+    /** Creates a new Intake. */
+    public Transfer() {
+        m_transferMotor = new CANSparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
+        m_transferMotor.setIdleMode(IdleMode.kBrake);
+        m_transferMotor.setInverted(true);
+    }
 
-  public void stop() {
-    m_transferMotor.set(0);
-  }
+    // Transfer methods
+    public void run() {
+        m_transferMotor.set(m_speed);
+    }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+    public void stop() {
+        m_transferMotor.set(0);
+    }
 
-  public Transfer onTrue(ExampleCommand exampleCommand) {
-    return null;
-  }
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+    }
+
+    public Transfer onTrue(ExampleCommand exampleCommand) {
+        return null;
+    }
 }
