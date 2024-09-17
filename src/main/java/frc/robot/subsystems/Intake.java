@@ -6,10 +6,14 @@ package frc.robot.subsystems;
 
 
 import com.revrobotics.CANSparkMax;
+<<<<<<< HEAD
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
+=======
+// import com.revrobotics.CANSparkMax.IdleMode;
+>>>>>>> startTest
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,6 +26,7 @@ public class Intake extends SubsystemBase {
   
   /** Creates a new Intake. */
   public Intake() {
+<<<<<<< HEAD
     m_intakeRollers = new IntakeRollers();
     m_intakePivot = new IntakePivot();
   }
@@ -58,6 +63,10 @@ public class Intake extends SubsystemBase {
 
   public double getIntakeRollersSpeed() {
     return m_intakeRollers.getSpeed();
+=======
+    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
+    // intakeMotor.setIdleMode(IdleMode.kBrake);   
+>>>>>>> startTest
   }
 
   @Override

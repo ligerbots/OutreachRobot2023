@@ -4,10 +4,10 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 
-public class StartIntake extends CommandBase {
+public class StartIntake extends Command {
   Intake m_intake;
   double m_speed;
   /** Creates a new StartIntake. */
