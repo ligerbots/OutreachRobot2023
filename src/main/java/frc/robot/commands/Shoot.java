@@ -205,7 +205,7 @@ public class Shoot extends Command {
   @Override
   public void end(boolean interrupted) {
     m_shooter.stopAll();
-    m_shooter.m_vision.setMode(VisionMode.INTAKE);
+    // m_shooter.m_vision.setMode(VisionMode.INTAKE);
     m_turret.spin(0.0);
     m_turret.resetBallCount();
     m_turretCommand.schedule();
