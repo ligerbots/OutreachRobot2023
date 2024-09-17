@@ -18,12 +18,13 @@ import frc.robot.commands.ExampleCommand;
 
 public class Transfer extends SubsystemBase {
   private CANSparkMax m_transferMotor;
-  private final double m_speed = 1.00; //TODO: find working voltage values
+  private final double m_speed = 0.30; //TODO: find working voltage values
   
   /** Creates a new Intake. */
   public Transfer() {
     m_transferMotor = new CANSparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
     m_transferMotor.setIdleMode(IdleMode.kBrake);
+    m_transferMotor.setInverted(true);
   }
 
   //Transfer methods

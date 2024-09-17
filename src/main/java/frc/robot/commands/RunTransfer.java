@@ -30,9 +30,7 @@ public class RunTransfer extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (interrupted){
-      m_transfer.stop();
-    }
+    m_transfer.stop();
   }
 
   // Returns true when the command should end.

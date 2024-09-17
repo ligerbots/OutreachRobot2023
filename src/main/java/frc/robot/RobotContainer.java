@@ -58,7 +58,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     m_driverController.a().onTrue(new StartIntake(m_intake, 0));
-    m_driverController.b().onTrue(new RunTransfer(m_transfer));
+    m_driverController.rightBumper().whileTrue(new RunTransfer(m_transfer));
   }
 
   public Command getDriveCommand() {
