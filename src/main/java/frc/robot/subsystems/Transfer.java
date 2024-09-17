@@ -27,8 +27,12 @@ public class Transfer extends SubsystemBase {
     }
 
     // Transfer methods
-    public void run() {
+    public void run(boolean runForwards) {
+      if (runForwards) {
         m_transferMotor.set(m_speed);
+      } else {
+        m_transferMotor.set(-m_speed);
+      }
     }
 
     public void stop() {

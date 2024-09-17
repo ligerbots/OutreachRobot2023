@@ -10,17 +10,19 @@ import frc.robot.subsystems.Transfer;
 
 public class RunTransfer extends Command {
   Transfer m_transfer;
+  boolean m_runForwards; // true = run forwards
 
   /** Creates a new RunTransfer. */
-  public RunTransfer(Transfer transfer) {
+  public RunTransfer(Transfer transfer, boolean runForwards) {
     m_transfer = transfer;
+    m_runForwards = runForwards;
     addRequirements(transfer);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_transfer.run();
+    m_transfer.run(m_runForwards);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
