@@ -15,7 +15,8 @@ package frc.robot;
 public final class Constants {
   
   //INTAKE
-  public static final int INTAKE_MOTOR_CAN_ID = 5;
+  public static final int INTAKE_ROLLERS_MOTOR_CAN_ID = 5;
+  public static final int INTAKE_PIVOT_MOTOR_CAN_ID = 6;
 
   //TRANSFER
   public static final int TRANSFER_MOTOR_CAN_ID = 4;
