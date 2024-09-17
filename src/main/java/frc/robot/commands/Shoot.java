@@ -10,7 +10,7 @@ import frc.robot.Robot;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Vision.VisionMode;
+//import frc.robot.subsystems.Vision.VisionMode;
 
 public class Shoot extends Command {
 
@@ -123,7 +123,7 @@ public class Shoot extends Command {
 
     // driveCommand.cancel();
     startTime = Robot.time();
-    m_shooter.m_vision.setMode(VisionMode.GOALFINDER);
+    // m_shooter.m_vision.setMode(VisionMode.GOALFINDER);
     m_turretCommand.cancel();
     currentControlMode = ControlMethod.ACQUIRING;
     //starts spinning up the shooter to hard-coded PID values
@@ -132,8 +132,8 @@ public class Shoot extends Command {
     // store current turretTick value
     initialTurretTicks = (int) m_turret.getPosition();
 
-    angleError = m_shooter.m_vision.getRobotAngle();
-    distance = m_shooter.m_vision.getDistance();
+    // angleError = m_shooter.m_vision.getRobotAngle();
+    // distance = m_shooter.m_vision.getDistance();
 
     currentControlMode = ControlMethod.SPIN_UP;
     startedTimerFlag = false;
@@ -152,13 +152,13 @@ public class Shoot extends Command {
   @Override
   public void execute() {
     if (!foundTarget) {
-      distance = m_shooter.m_vision.getDistance();
+      // distance = m_shooter.m_vision.getDistance();
       if (distance != 0.0) {
         foundTarget = true;
         currentControlMode = ControlMethod.SPIN_UP;
         // We found the target. Set the turret angle based on the vision system before
         // we spin up the shooter
-        angleError = m_shooter.m_vision.getRobotAngle();
+        // angleError = m_shooter.m_vision.getRobotAngle();
         // angleError = 0.0;
         m_shooter.setTurretAdjusted(angleError);
         shooterTargetSpeed = -m_shooter.calculateShooterSpeed(distance);  
