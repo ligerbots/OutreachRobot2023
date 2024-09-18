@@ -9,18 +9,23 @@ import frc.robot.subsystems.Intake;
 
 public class RunIntake extends Command { //TODO: find a more suitable name for this
   Intake m_intake;
-  /** Creates a new StartIntake. */
+  boolean m_runForwards; // true = run forwards
   
-  
-  public RunIntake(Intake intake) {
+  /** Creates a new RunIntake. */
+  public RunIntake(Intake intake, boolean runForwards) {
     m_intake = intake;
+    m_runForwards = runForwards;
     addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.IntakeBalls();
+    if (m_runForwards) {
+      m_intake.intake();
+    } else {
+      m_intake.outtake();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -29,7 +34,9 @@ public class RunIntake extends Command { //TODO: find a more suitable name for t
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_intake.stopIntakeRollers();
+  }
 
   // Returns true when the command should end.
   @Override
