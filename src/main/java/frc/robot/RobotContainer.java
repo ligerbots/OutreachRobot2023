@@ -6,7 +6,7 @@ package frc.robot;
 
 // import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.DriveCommand;
+import frc.robot.commands.Drive;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.StartIntake;
 import frc.robot.subsystems.DriveTrain;
@@ -62,7 +62,7 @@ public class RobotContainer {
     // Left stick Y axis -> forward and backwards movement
     // Right stick X axis -> rotation
     // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
-    return new DriveCommand(
+    return new Drive(
             m_driveTrain,
             () -> -modifyAxis(m_driverController.getLeftY()),
             () -> -modifyAxis(m_driverController.getRightX()));
