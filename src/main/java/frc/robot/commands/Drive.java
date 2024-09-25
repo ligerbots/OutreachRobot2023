@@ -9,14 +9,14 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrain;
 
-public class DriveCommand extends Command {
+public class Drive extends Command {
   /** Creates a new DriveCommand. */
 
   DriveTrain m_driveTrain;
   DoubleSupplier m_throttle;
   DoubleSupplier m_turn;
 
-  public DriveCommand(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
+  public Drive(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
     m_driveTrain = driveTrain;
     m_throttle = throttle;
     m_turn = turn;
