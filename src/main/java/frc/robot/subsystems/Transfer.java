@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.ExampleCommand;
 
 public class Transfer extends SubsystemBase {
     private CANSparkMax m_transferMotor;
@@ -42,9 +41,5 @@ public class Transfer extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-    }
-
-    public Transfer onTrue(ExampleCommand exampleCommand) {
-        return null;
     }
 }

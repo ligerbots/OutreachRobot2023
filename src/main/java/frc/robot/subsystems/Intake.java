@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.ExampleCommand;
 
 public class Intake extends SubsystemBase {
   private IntakeRollers m_intakeRollers;
@@ -60,9 +59,5 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-  }
-
-  public Intake onTrue(ExampleCommand exampleCommand) {
-    return null;
   }
 }
