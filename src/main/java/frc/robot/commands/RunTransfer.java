@@ -5,24 +5,24 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Transfer;
 
-public class StartIntake extends Command {
-  Intake m_intake;
-  double m_speed;
-  /** Creates a new StartIntake. */
-  
-  
-  public StartIntake(Intake intake, double speed) {
-     m_intake = intake;
-     m_speed = speed; 
-     addRequirements(intake);
+public class RunTransfer extends Command {
+  Transfer m_transfer;
+  boolean m_runForwards; // true = run forwards
+
+  /** Creates a new RunTransfer. */
+  public RunTransfer(Transfer transfer, boolean runForwards) {
+    m_transfer = transfer;
+    m_runForwards = runForwards;
+    addRequirements(transfer);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.run(m_speed);
+    m_transfer.run(m_runForwards);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -32,9 +32,7 @@ public class StartIntake extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (interrupted){
-      m_intake.run(0);
-    }
+    m_transfer.stop();
   }
 
   // Returns true when the command should end.

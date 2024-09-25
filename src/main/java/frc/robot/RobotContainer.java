@@ -5,20 +5,15 @@
 package frc.robot;
 
 // import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
 import frc.robot.commands.Drive;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.StartIntake;
+import frc.robot.commands.RunIntake;
+import frc.robot.commands.RunTransfer;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Transfer;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -31,6 +26,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Intake m_intake = new Intake();
   private final DriveTrain m_driveTrain = new DriveTrain();
+  private final Transfer m_transfer = new Transfer();
 
   private final CommandXboxController m_driverController = new CommandXboxController(0);
 
@@ -54,7 +50,10 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    m_driverController.a().onTrue(new StartIntake(m_intake, 0));
+    m_driverController.a().whileTrue(new RunIntake(m_intake, true));
+    m_driverController.b().whileTrue(new RunIntake(m_intake, false));
+    m_driverController.rightBumper().whileTrue(new RunTransfer(m_transfer, true));
+    m_driverController.leftBumper().whileTrue(new RunTransfer(m_transfer, false));
   }
 
   public Command getDriveCommand() {

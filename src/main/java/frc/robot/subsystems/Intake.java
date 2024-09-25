@@ -11,44 +11,53 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.ExampleCommand;
-
-
-
 
 public class Intake extends SubsystemBase {
-  CANSparkMax intakeMotor;
-  /** Creates a new Intake. */
+  private IntakeRollers m_intakeRollers;
+  private IntakePivot m_intakePivot;
   
+  /** Creates a new Intake. */
   public Intake() {
-    intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID ,MotorType.kBrushless);
-    // intakeMotor.setIdleMode(IdleMode.kBrake);   
+    m_intakeRollers = new IntakeRollers();
+    m_intakePivot = new IntakePivot();
+  }
+
+  //IntakePivot methods
+  public void deployIntake() {
+    m_intakePivot.deployIntake();
+  }
+
+  public void retractIntake() {
+    m_intakePivot.retractIntake();
+  }
+
+  public IntakePivotState getPivotState() {
+    return m_intakePivot.getPivotState();
+  }
+
+  //IntakeRollers methods
+  public void runIntakeRollers(double speed){
+    m_intakeRollers.run(speed);
+  }
+
+  public void intake(){
+    m_intakeRollers.intake();
+  }
+
+  public void outtake(){
+    m_intakeRollers.outtake();
+  }
+
+  public void stopIntakeRollers(){
+    m_intakeRollers.intake();
+  }
+
+  public double getIntakeRollersSpeed() {
+    return m_intakeRollers.getSpeed();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  public void run(double speed){
-    intakeMotor.set(-speed); 
-    // function to run the motor
-  }
-
-  public void IntakeBalls(){
-    run(0.25); 
-    // experiment with the numbers
-    // showing speed of motor when intaking balls
-  }
-
-  public void OutputBalls(){
-    run(-0.25); 
-    // experiment with the numbers
-    // showing the speed of motor when outputting balls
-  }
-
-  public Intake onTrue(ExampleCommand exampleCommand) {
-    return null;
-  }
-
 }
