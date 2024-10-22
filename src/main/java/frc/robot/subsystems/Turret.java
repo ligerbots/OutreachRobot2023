@@ -7,11 +7,12 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
-// import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase;
 // import com.revrobotics.CANSparkMax.IdleMode;
 // import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 // import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +25,7 @@ public class Turret extends SubsystemBase {
     public CANSparkMax m_turretMotor;
     private final RelativeEncoder m_turretMotorEncoder;
     private final double TURRET_GEAR_REDUCTION = 1.0 / 162.5;
-    private final double RADIANS_PER_REVOLUTION = 2 * Math.PI * TURRET_GEAR_REDUCTION;
+    private final double DEG_PER_REVOLUTION = 360 * TURRET_GEAR_REDUCTION;
 
     // PID Stuff
     private SparkPIDController m_pidController;
@@ -35,19 +36,22 @@ public class Turret extends SubsystemBase {
 
     /** Creates a new Turret. */
     public Turret() {
-        // super(null); //TODO: put constraints in here if we're changing this to
-        // trapezoidal
+        // super(null); //TODO: put constraints in here if we're changing this to trapezoidal
         m_turretMotor = new CANSparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
         m_turretMotor.restoreFactoryDefaults();
         m_turretMotorEncoder = m_turretMotor.getEncoder();
-        m_turretMotorEncoder.setPositionConversionFactor(RADIANS_PER_REVOLUTION); // All future angle refrences will be
-                                                                                  // based off this
-        m_pidController = m_turretMotor.getPIDController(); // Use `m_pidController.setReference(<Angle>,
-                                                            // ControlType.kPosition);`
+        m_turretMotorEncoder.setPositionConversionFactor(DEG_PER_REVOLUTION); // All future angle refrences will be based off this
+        
+        m_pidController = m_turretMotor.getPIDController(); // Use `m_pidController.setReference(<Angle>, ControlType.kPosition);`
         m_pidController.setP(K_P);
         m_pidController.setI(K_I);
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
+        m_pidController.setPositionPIDWrappingEnabled(false);
+        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, -200);
+        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, 200);
+        m_pidController.setReference(0, ControlType.kPosition);
+        doZeroRoutine();
     }
 
     // protected void useState(TrapezoidProfile.State setPoint) {}
@@ -57,8 +61,32 @@ public class Turret extends SubsystemBase {
         // This method will be called once per scheduler run
     }
 
+    public void doZeroRoutine() {
+        //TODO: Put in proper encoders and zero sensor
+        /*This is all psuedocode
+        final int MOVE_SIZE = 5 (degrees)
+        initialStringPotLen = m_stringPot.getPosition()
+        m_turretMotor.set(5)
+        finalStringPotLen = m_stringPot.getPosition()
+        if initialStringPotLen > finalStringPotLen {
+            m_turretMotor.setVelocity(0.1) //very slow
+            while m_zeroSensor == False {
+                //Wait for it to continue rotating
+            }
+            //Once it hits the magnet sensor, set to zero
+            m_pidController.setReference(0, ControlType.kPosition);
+        } else {
+            m_turretMotor.setVelocity(-0.1)
+            while m_zeroSensor == False {
+                
+            }
+            m_pidController.setReference(0, ControlType.kPosition);
+        }
+        */
+    }
+
     public void setTurretAngle(double angle) {
-        m_pidController.setReference(angle, ControlType.kPosition);
+        m_turretMotorEncoder.setPosition(angle);
     }
 
     public double getPosition() {
