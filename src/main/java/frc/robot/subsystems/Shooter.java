@@ -23,6 +23,7 @@ public class Shooter extends SubsystemBase {
     TalonFX m_shooter;
     // the thing that actually does the shooting
     TalonFX m_flup;
+    //TODO: Replace with motor
     Servo m_hoodServo, m_turretServo;
     TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double, Double[]>() {
     }; // set up lookup table for ranges

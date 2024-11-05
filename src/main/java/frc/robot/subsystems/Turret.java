@@ -12,12 +12,10 @@ import com.revrobotics.CANSparkBase;
 // import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class Turret extends SubsystemBase {
@@ -34,6 +32,14 @@ public class Turret extends SubsystemBase {
     private static double K_D = 0.0;
     private static double K_FF = 1.0;
 
+    //Turret Rotation Limits
+    private final int TURRET_LOWER_BOUND_DEGREES = -200;
+    private final int TURRET_UPPER_BOUND_DEGREES = 200;
+
+    //Zeroing Constants
+    final int STRING_POT_MAX_LENGTH = 10; //(inches) TODO: Update with the maximum length that the string pot could be before the wires go taut
+    final int MOVE_SIZE = 5; //(degrees)
+
     /** Creates a new Turret. */
     public Turret() {
         // super(null); //TODO: put constraints in here if we're changing this to trapezoidal
@@ -48,10 +54,10 @@ public class Turret extends SubsystemBase {
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
         m_pidController.setPositionPIDWrappingEnabled(false);
-        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, -200);
-        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, 200);
+        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, TURRET_LOWER_BOUND_DEGREES);
+        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, TURRET_UPPER_BOUND_DEGREES);
         m_pidController.setReference(0, ControlType.kPosition);
-        doZeroRoutine();
+        //doZeroRoutine(); TODO: Find out where to put this. Maybe command?
     }
 
     // protected void useState(TrapezoidProfile.State setPoint) {}
@@ -59,43 +65,44 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        //TODO: Add SmartDashboard here
+        SmartDashboard.putNumber("Turret/Angle", m_turretMotorEncoder.getPosition());
     }
 
     public void doZeroRoutine() {
         //TODO: Put in proper encoders and zero sensor
         /*This is all psuedocode
-        final int MOVE_SIZE = 5 (degrees)
         initialStringPotLen = m_stringPot.getPosition()
-        m_turretMotor.set(5)
+        m_pidController.setReference(MOVE_SIZE)
         finalStringPotLen = m_stringPot.getPosition()
         if initialStringPotLen > finalStringPotLen {
             m_turretMotor.setVelocity(0.1) //very slow
-            while m_zeroSensor == False {
+            while m_zeroSensor == False && {
                 //Wait for it to continue rotating
             }
             //Once it hits the magnet sensor, set to zero
-            m_pidController.setReference(0, ControlType.kPosition);
+            m_turretMotorEncoder.setPosition(0);
         } else {
             m_turretMotor.setVelocity(-0.1)
             while m_zeroSensor == False {
                 
             }
-            m_pidController.setReference(0, ControlType.kPosition);
+            m_turretMotorEncoder.setPosition(0);
         }
         */
     }
 
     public void setTurretAngle(double angle) {
-        m_turretMotorEncoder.setPosition(angle);
+        while (angle <= TURRET_LOWER_BOUND_DEGREES + 10) { //10 degrees shy of bounds to avoid damage from PID overshoot
+            angle += 360.0;
+        }
+        while (angle >= TURRET_UPPER_BOUND_DEGREES - 10) {
+            angle -= 360.0;
+        }
+        m_pidController.setReference(angle, ControlType.kPosition);
     }
 
     public double getPosition() {
         return m_turretMotorEncoder.getPosition();
-    }
-
-    public void spin(double d) {
-    }
-
-    public void resetBallCount() {
     }
 }

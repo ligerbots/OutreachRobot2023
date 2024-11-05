@@ -106,7 +106,6 @@ public class Shoot extends Command {
 
   public void rapidFire() {
     m_shooter.shoot();
-    m_turret.spin(1);
   }
 
   // Called when the command is initially scheduled.
@@ -206,8 +205,6 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     m_shooter.stopAll();
     // m_shooter.m_vision.setMode(VisionMode.INTAKE);
-    m_turret.spin(0.0);
-    m_turret.resetBallCount();
     m_turretCommand.schedule();
     System.out.println("Shooter: turretCommand scheduled" + m_turretCommand);
     //if (rescheduleDriveCommand) {
