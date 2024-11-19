@@ -7,6 +7,9 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
+
+import javax.lang.model.util.ElementScanner14;
+
 import com.revrobotics.CANSparkBase;
 // import com.revrobotics.CANSparkMax.IdleMode;
 // import com.revrobotics.CANSparkLowLevel;
@@ -35,6 +38,7 @@ public class Turret extends SubsystemBase {
     //Turret Rotation Limits
     private final int TURRET_LOWER_BOUND_DEGREES = -200;
     private final int TURRET_UPPER_BOUND_DEGREES = 200;
+    private final double TURRET_ROTATION_VELOCITY = 1; //TODO: Tune
 
     //Zeroing Constants
     final int STRING_POT_MAX_LENGTH = 10; //(inches) TODO: Update with the maximum length that the string pot could be before the wires go taut
@@ -92,6 +96,10 @@ public class Turret extends SubsystemBase {
         */
     }
 
+    public void setZero() {
+        m_turretMotorEncoder.setPosition(0);
+    }
+
     public void setTurretAngle(double angle) {
         while (angle <= TURRET_LOWER_BOUND_DEGREES + 10) { //10 degrees shy of bounds to avoid damage from PID overshoot
             angle += 360.0;
@@ -100,6 +108,16 @@ public class Turret extends SubsystemBase {
             angle -= 360.0;
         }
         m_pidController.setReference(angle, ControlType.kPosition);
+    }
+
+    public void setTurretVelocity(int direction) {
+        if (direction == 1) {
+            m_turretMotor.set(TURRET_ROTATION_VELOCITY);
+        } else if (direction == -1){
+            m_turretMotor.set(-TURRET_ROTATION_VELOCITY);
+        } else {
+            m_turretMotor.set(0);
+        }
     }
 
     public double getPosition() {

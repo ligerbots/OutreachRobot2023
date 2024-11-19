@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.TurretCommand;
+import frc.robot.commands.TurretSetZero;
 import frc.robot.commands.Drive;
 import frc.robot.commands.Shoot;
 import frc.robot.subsystems.Turret;
@@ -54,6 +55,9 @@ public class RobotContainer {
         m_driverController.x()
                 .onTrue(new Shoot(m_shooter, m_turret, m_driveTrain, new TurretCommand(m_turret, 0), false));
         m_driverController.a().onTrue(new StartIntake(m_intake, 0));
+        m_driverController.rightBumper().onTrue(new TurretSetZero(m_turret)); //TODO: Configure proper buttons
+        m_driverController.rightTrigger().whileTrue(new TurretCommand(m_turret, -1));
+        m_driverController.leftTrigger().whileTrue(new TurretCommand(m_turret, 1));
     }
 
     Command getDriveCommand() {

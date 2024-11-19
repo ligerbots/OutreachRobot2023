@@ -7,32 +7,27 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret;
 
-public class TurretCommand extends Command {
+public class TurretSetZero extends Command {
   private Turret m_turret;
-  private int m_direction;
 
-  /** Creates a new CarouselCommand. */
-  public TurretCommand(Turret turret, int direction) {
+  public TurretSetZero(Turret turret) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_turret = turret;
-    m_direction = direction;
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_turret.setZero();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    m_turret.setTurretVelocity(m_direction);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    m_turret.setTurretVelocity(0);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
