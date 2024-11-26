@@ -76,6 +76,7 @@ public class Turret extends SubsystemBase {
     public void doZeroRoutine() {
         //TODO: Put in proper encoders and zero sensor
         /*This is all psuedocode
+        String Pot Method:
         initialStringPotLen = m_stringPot.getPosition()
         m_pidController.setReference(MOVE_SIZE)
         finalStringPotLen = m_stringPot.getPosition()
@@ -93,6 +94,17 @@ public class Turret extends SubsystemBase {
             }
             m_turretMotorEncoder.setPosition(0);
         }
+
+        String Hard Stop Method: Attach string analog for wires, a bit shorter so it goes tight before the wires.
+        The fixed point is set when the string gets pulled taut and the amperage spikes. Con: The string may stretch over time, so maybe use a Hall Effect sensor if it becomes a problem.
+        getMotorAmperage(): Get the amperage that the Turret motor is using
+        final double TURRET_MOTOR_HARD_STOP_AMPERAGE = 20 Amps (just a guess)
+        final double TURRET_ROTATION_VELOCITY = 1 (degrees/second???)
+        while (getMotorAmperage() < TURRET_MOTOR_HARD_STOP_AMPERAGE) {
+            Do nothing
+        }
+        Set to positive bound
+        m_turretMotorEncoder.setPosition(200);
         */
     }
 
@@ -111,13 +123,7 @@ public class Turret extends SubsystemBase {
     }
 
     public void setTurretVelocity(int direction) {
-        if (direction == 1) {
-            m_turretMotor.set(TURRET_ROTATION_VELOCITY);
-        } else if (direction == -1){
-            m_turretMotor.set(-TURRET_ROTATION_VELOCITY);
-        } else {
-            m_turretMotor.set(0);
-        }
+        m_turretMotor.set(TURRET_ROTATION_VELOCITY * direction);
     }
 
     public double getPosition() {
