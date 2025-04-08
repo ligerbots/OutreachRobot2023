@@ -5,9 +5,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -16,7 +13,7 @@ import frc.robot.Constants;
 
 public class Transfer extends SubsystemBase {
     private CANSparkMax m_transferMotor;
-    private final double m_speed = 0.30; // TODO: find working voltage values
+    private static final double SPEED = 0.30;
 
     /** Creates a new Intake. */
     public Transfer() {
@@ -24,22 +21,22 @@ public class Transfer extends SubsystemBase {
         m_transferMotor.setIdleMode(IdleMode.kBrake);
         m_transferMotor.setInverted(true);
     }
-
+    
     // Transfer methods
-    public void run(boolean runForwards) {
-      if (runForwards) {
-        m_transferMotor.set(m_speed);
-      } else {
-        m_transferMotor.set(-m_speed);
-      }
+    public void intake() {
+        m_transferMotor.set(SPEED);
+    }
+    
+    public void outtake() {
+        m_transferMotor.set(-SPEED);
     }
 
     public void stop() {
         m_transferMotor.set(0);
     }
-
-    @Override
-    public void periodic() {
-        // This method will be called once per scheduler run
-    }
+    
+    // @Override
+    // public void periodic() {
+    //     // This method will be called once per scheduler run
+    // }
 }
