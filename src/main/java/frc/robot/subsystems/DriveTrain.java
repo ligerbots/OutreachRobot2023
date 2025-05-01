@@ -6,11 +6,18 @@ package frc.robot.subsystems;
 
 import java.util.Arrays;
 
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.LimitSwitchConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
-import com.revrobotics.CANSparkMax;
+import com.studica.frc.AHRS;
+
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.RelativeEncoder;
-import com.kauailabs.navx.frc.AHRS; 
+
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,8 +32,8 @@ import edu.wpi.first.math.util.Units;
 
 public class DriveTrain extends SubsystemBase {
     
-    private CANSparkMax m_leftMotor = new CANSparkMax(Constants.LEFT_MOTOR_CAN_ID, com.revrobotics.CANSparkLowLevel.MotorType.kBrushless);
-    private CANSparkMax m_rightMotor = new CANSparkMax(Constants.RIGHT_MOTOR_CAN_ID, com.revrobotics.CANSparkLowLevel.MotorType.kBrushless);
+    private SparkMax m_leftMotor = new SparkMax(Constants.LEFT_MOTOR_CAN_ID, MotorType.kBrushless);
+    private SparkMax m_rightMotor = new SparkMax(Constants.RIGHT_MOTOR_CAN_ID, MotorType.kBrushless);
     
     private DifferentialDrive m_robotDrive;
     private DifferentialDriveOdometry m_odometry;
@@ -44,19 +51,20 @@ public class DriveTrain extends SubsystemBase {
     public DriveTrain() {
         m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
         
-        // Set current limiting on drve train to prevent brown outs
-        m_leftMotor.setSmartCurrentLimit(CURRENT_LIMIT);
-        m_rightMotor.setSmartCurrentLimit(CURRENT_LIMIT);
-        
-        // Set motors to brake when idle. We don't want the drive train to coast.
-        m_leftMotor.setIdleMode(com.revrobotics.CANSparkBase.IdleMode.kBrake);
-        m_rightMotor.setIdleMode(com.revrobotics.CANSparkBase.IdleMode.kBrake);
-        
-        m_leftEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
-        m_rightEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.inverted(true);
+        // always set a current limit
+        config.smartCurrentLimit(CURRENT_LIMIT);
+        config.idleMode(IdleMode.kBrake);
 
+        // Set current limiting on drve train to prevent brown outs
+        m_leftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_rightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        
         m_leftEncoder = m_leftMotor.getEncoder();
         m_rightEncoder = m_rightMotor.getEncoder();
+        m_leftEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
+        m_rightEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
         
         //FIXME: Not sure what the second two arguments do, from looking at the docs they seem unnessary
         m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), 0, 0);
