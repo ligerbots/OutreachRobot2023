@@ -12,15 +12,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     TalonFX m_shooter;
     // the thing that actually does the shooting
-    TalonFX m_flup;
+    SparkMax m_flup;
 
     //TODO: Replace with motor
     // Servo m_hoodServo;
@@ -34,22 +37,21 @@ public class Shooter extends SubsystemBase {
     private static final double SHOOTER_STATOR_CURRENT_LIMIT = 40.0;
 
     // PID Constants for the shooter PID controller
-    private static final double SHOOTER_K_P = 0.12;
+    private static final double K_P = 0.12;
 
     // constructor
     public Shooter() {
         m_shooter = new TalonFX(Constants.SHOOTER_CAN_ID);
-        m_shooter.getConfigurator().apply(new TalonFXConfiguration());
-
-        // m_shooter.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, kPIDLoopIdx, kTimeoutMs)
 
         // PID Configs
-        var talonFXConfigs = new TalonFXConfiguration();
-        // set slot 0 gains and leave every other config factory-default
-        var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kP = SHOOTER_K_P;
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        // set slot 0 gains
+        Slot0Configs slot0configs = config.Slot0;
+        slot0configs.kP = K_P;  // start small!!!
+        slot0configs.kI = 0.0; // no output for integrated error
+        slot0configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
 
-        m_shooter.getConfigurator().apply(talonFXConfigs, 0.1);
+        m_shooter.getConfigurator().apply(config, 0.1);
 
         // Supply current limiting
         CurrentLimitsConfigs shooterCurrentLimitConfigs = new CurrentLimitsConfigs();
@@ -57,32 +59,6 @@ public class Shooter extends SubsystemBase {
         shooterCurrentLimitConfigs.StatorCurrentLimitEnable = true;
 
         m_shooter.getConfigurator().apply(shooterCurrentLimitConfigs);
-
-        // // always have an entry at 0 so that it has a chance of working at short
-        // // distances
-        // m_distanceLookUp.put(0.0, new Double[] { 5500.0, 103.0 });
-        // m_distanceLookUp.put(50.0, new Double[] { 5500.0, 103.0 });
-        // m_distanceLookUp.put(110.0, new Double[] { 6500.0, 87.0 });
-        // m_distanceLookUp.put(170.0, new Double[] { 8500.0, 70.0 });
-        // m_distanceLookUp.put(230.0, new Double[] { 9000.0, 60.0 });
-        // m_distanceLookUp.put(318.1, new Double[] { 9000.0, 55.0 });
-        // // extra far, to make sure the table work at the long end
-        // m_distanceLookUp.put(400.0, new Double[] { 9000.0, 50.0 });
-
-        // // The relative setting for non-zero angles needs to be recomputed if the zero
-        // // setting chenges,
-        // // but at least we'll be close
-        // m_turretAngleLookup.put(-5.0, Constants.TURRET_ANGLE_ZERO_SETTING - 23.0);
-        // m_turretAngleLookup.put(-4.0, Constants.TURRET_ANGLE_ZERO_SETTING - 18.0);
-        // m_turretAngleLookup.put(-3.0, Constants.TURRET_ANGLE_ZERO_SETTING - 11.0);
-        // m_turretAngleLookup.put(-2.0, Constants.TURRET_ANGLE_ZERO_SETTING - 6.0);
-        // m_turretAngleLookup.put(-1.0, Constants.TURRET_ANGLE_ZERO_SETTING - 4.0);
-        // m_turretAngleLookup.put(0.0, Constants.TURRET_ANGLE_ZERO_SETTING);
-        // m_turretAngleLookup.put(1.0, Constants.TURRET_ANGLE_ZERO_SETTING + 4.0);
-        // m_turretAngleLookup.put(2.0, Constants.TURRET_ANGLE_ZERO_SETTING + 7.0);
-        // m_turretAngleLookup.put(3.0, Constants.TURRET_ANGLE_ZERO_SETTING + 10.5);
-        // m_turretAngleLookup.put(4.0, Constants.TURRET_ANGLE_ZERO_SETTING + 13.0);
-        // m_turretAngleLookup.put(5.0, Constants.TURRET_ANGLE_ZERO_SETTING + 15.0);
     }
 
     // called a lot
@@ -124,22 +100,9 @@ public class Shooter extends SubsystemBase {
         m_flup.set(-0.5);
     }
 
-    public void testSpin() {
-        setShooterRpm(4000.0);
-        SmartDashboard.putString("shooter/Status", "Shooting");
-    }
-
     // does literally nothing
     public void setShooterRpm(double rpm) {
-        System.out.println("Shooter RPM SET!!!!!");
-        // for the shooter to run the right direction, rpm values passed to setReference
-        // must be negative
-        // passing the negative absolute value causes the passed value to always be
-        // negative,
-        // while allowing the function argument to be positive or negative
-        if (rpm < 0)
-            System.out.println("warning: shooter rpm argument should be positive");
-        // pidController.setReference(-Math.abs(rpm), ControlType.kVelocity, 0, -0.8);
+        m_shooter.setControl(new VelocityDutyCycle(rpm));
     }
 
     public double calculateShooterSpeed(double distance) {

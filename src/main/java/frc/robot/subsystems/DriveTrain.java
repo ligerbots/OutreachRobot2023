@@ -4,13 +4,10 @@
 
 package frc.robot.subsystems;
 
-import java.util.Arrays;
-
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import com.studica.frc.AHRS;
@@ -18,7 +15,6 @@ import com.studica.frc.AHRS.NavXComType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
@@ -26,9 +22,9 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Robot;
 import edu.wpi.first.math.util.Units;
+
+import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
     
@@ -41,7 +37,7 @@ public class DriveTrain extends SubsystemBase {
     private RelativeEncoder m_leftEncoder; 
     private RelativeEncoder m_rightEncoder; 
     
-    private final AHRS m_navX = new AHRS(NavXComType.kMXP_SPI, (byte) 200);
+    private final AHRS m_navX = new AHRS(NavXComType.kMXP_SPI);
     
     private static final int CURRENT_LIMIT = 35;
     
@@ -59,8 +55,8 @@ public class DriveTrain extends SubsystemBase {
 
         config.encoder.positionConversionFactor(METER_PER_REVOLUTION);
 
-        // Set current limiting on drve train to prevent brown outs
         m_leftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        config.inverted(false);
         m_rightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         m_leftEncoder = m_leftMotor.getEncoder();

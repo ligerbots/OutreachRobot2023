@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,6 +31,8 @@ public class RobotContainer {
     
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         // Configure the trigger bindings
         configureBindings();
         
@@ -47,7 +50,6 @@ public class RobotContainer {
         // The controls are for field-oriented driving:
         // Left stick Y axis -> forward and backwards movement
         // Right stick X axis -> rotation
-        // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
         return new Drive(
                 m_driveTrain,
                 () -> -modifyAxis(m_driverController.getLeftY()),

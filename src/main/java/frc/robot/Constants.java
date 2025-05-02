@@ -25,8 +25,8 @@ public final class Constants {
     public static final int RIGHT_MOTOR_CAN_ID = 1;
     public static final int LEFT_MOTOR_CAN_ID = 2;
     
-    // Shooter SPARK MAXES
-    public static final int SHOOTER_CAN_ID = 7; 
+    // Shooter 
+    public static final int SHOOTER_CAN_ID = 1; // Falcon
     public static final int SHOOTER_FLUP_CAN_ID = 8; 
     public static final int TURRET_MOTOR_CAN_ID = 9;
 }
