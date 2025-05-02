@@ -15,7 +15,12 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 
 import frc.robot.Constants;
@@ -59,6 +64,16 @@ public class Shooter extends SubsystemBase {
         shooterCurrentLimitConfigs.StatorCurrentLimitEnable = true;
 
         m_shooter.getConfigurator().apply(shooterCurrentLimitConfigs);
+
+        m_flup = new SparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
+
+        SparkMaxConfig configSparkMax = new SparkMaxConfig();
+        configSparkMax.inverted(true);
+        // always set a current limit
+        // config.smartCurrentLimit(CURRENT_LIMIT);
+        configSparkMax.idleMode(IdleMode.kBrake);
+
+        m_flup.configure(configSparkMax, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     // called a lot
@@ -97,12 +112,12 @@ public class Shooter extends SubsystemBase {
 
     // SHOOT!!!!!!!!!!
     public void shoot() {
-        m_flup.set(-0.5);
+        m_flup.set(0.5);
     }
 
     // does literally nothing
     public void setShooterRpm(double rpm) {
-        m_shooter.setControl(new VelocityDutyCycle(rpm));
+        m_shooter.setControl(new VelocityDutyCycle(rpm/60));
     }
 
     public double calculateShooterSpeed(double distance) {
