@@ -55,6 +55,7 @@ public class Shooter extends SubsystemBase {
         slot0configs.kP = K_P;  // start small!!!
         slot0configs.kI = 0.0; // no output for integrated error
         slot0configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
+        slot0configs.kV = 1000/60; // feed forward gain
 
         m_shooter.getConfigurator().apply(config, 0.1);
 
