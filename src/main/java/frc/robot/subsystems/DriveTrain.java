@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import com.studica.frc.AHRS;
-
+import com.studica.frc.AHRS.NavXComType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.RelativeEncoder;
 
@@ -41,7 +41,7 @@ public class DriveTrain extends SubsystemBase {
     private RelativeEncoder m_leftEncoder; 
     private RelativeEncoder m_rightEncoder; 
     
-    private final AHRS m_navX = new AHRS(Port.kMXP, (byte) 200);
+    private final AHRS m_navX = new AHRS(NavXComType.kMXP_SPI, (byte) 200);
     
     private static final int CURRENT_LIMIT = 35;
     
@@ -57,14 +57,14 @@ public class DriveTrain extends SubsystemBase {
         config.smartCurrentLimit(CURRENT_LIMIT);
         config.idleMode(IdleMode.kBrake);
 
+        config.encoder.positionConversionFactor(METER_PER_REVOLUTION);
+
         // Set current limiting on drve train to prevent brown outs
         m_leftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_rightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         m_leftEncoder = m_leftMotor.getEncoder();
         m_rightEncoder = m_rightMotor.getEncoder();
-        m_leftEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
-        m_rightEncoder.setPositionConversionFactor(METER_PER_REVOLUTION);
         
         //FIXME: Not sure what the second two arguments do, from looking at the docs they seem unnessary
         m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), 0, 0);
@@ -120,13 +120,6 @@ public class DriveTrain extends SubsystemBase {
     
     
     public void allDrive(double throttle, double rotate, boolean squaredInputs) {
-        // TODO: We should look into using the deadband settings in DifferentialDrive
-        if (squaredInputs) {
-            if (Math.abs(throttle) < 0.1)
-            throttle = 0;
-            if (Math.abs(rotate) < 0.1)
-            rotate = 0;
-        }
         m_robotDrive.arcadeDrive(throttle, -rotate, squaredInputs);
     }
     
@@ -148,12 +141,11 @@ public class DriveTrain extends SubsystemBase {
         return m_navX.getPitch(); 
     }
     
-    public void setIdleMode(IdleMode idleMode) {
-        if (Robot.isReal()) {
-            Arrays.asList(m_leftMotor, m_rightMotor)
-            .forEach((CANSparkMax spark) -> spark.setIdleMode(idleMode));
-        }
-    }
-    
-    
+    // public void setIdleMode(IdleMode idleMode) {
+    //     if (Robot.isReal()) {
+    //         m_leftMotor.
+    //         Arrays.asList(m_leftMotor, m_rightMotor)
+    //         .forEach((SparkMax spark) -> spark.setIdleMode(idleMode));
+    //     }
+    // }    
 }
