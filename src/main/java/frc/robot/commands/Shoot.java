@@ -17,6 +17,7 @@ public class Shoot extends Command {
     
     // time (seconds) it takes to shoot the ball after starting the flup
     private static final double SHOOT_TIMER = 0.25;
+    private static final double SPIN_UP_TIMER = 2;
     
     private final Shooter m_shooter;
     private final double m_speed;
@@ -40,12 +41,13 @@ public class Shoot extends Command {
         m_shooter.setShooterRpm(m_speed);
         m_state = State.SPIN_UP;
         SmartDashboard.putString("shooter/state", m_state.toString());
+        m_timer.restart();
     }
     
     @Override
     public void execute() {
         if (m_state == State.SPIN_UP) {
-            if (m_shooter.speedOnTarget(m_speed, 5)) {
+            if (m_shooter.speedOnTarget(m_speed, 5) || m_timer.hasElapsed(SPIN_UP_TIMER)) {
                 // start flup to shoot
                 m_shooter.shoot();
                 m_timer.restart();
