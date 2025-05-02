@@ -4,15 +4,15 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 
-import com.revrobotics.CANSparkBase;
-// import com.revrobotics.CANSparkMax.IdleMode;
-// import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,7 +20,7 @@ import frc.robot.Constants;
 
 public class Turret extends SubsystemBase {
     public boolean backwards;
-    public CANSparkMax m_turretMotor;
+    public SparkMax m_turretMotor;
     private final RelativeEncoder m_turretMotorEncoder;
     private final double TURRET_GEAR_REDUCTION = 1.0 / 162.5;
     private final double DEG_PER_REVOLUTION = 360 * TURRET_GEAR_REDUCTION;
@@ -44,20 +44,32 @@ public class Turret extends SubsystemBase {
     /** Creates a new Turret. */
     public Turret() {
         // super(null); //TODO: put constraints in here if we're changing this to trapezoidal
-        m_turretMotor = new CANSparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
-        m_turretMotor.restoreFactoryDefaults();
-        m_turretMotorEncoder = m_turretMotor.getEncoder();
-        m_turretMotorEncoder.setPositionConversionFactor(DEG_PER_REVOLUTION); // All future angle refrences will be based off this
+        m_turretMotor = new SparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
         
-        m_pidController = m_turretMotor.getPIDController(); // Use `m_pidController.setReference(<Angle>, ControlType.kPosition);`
-        m_pidController.setP(K_P);
-        m_pidController.setI(K_I);
-        m_pidController.setD(K_D);
-        m_pidController.setFF(K_FF);
-        m_pidController.setPositionPIDWrappingEnabled(false);
-        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, TURRET_LOWER_BOUND_DEGREES);
-        m_turretMotor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, TURRET_UPPER_BOUND_DEGREES);
-        m_pidController.setReference(0, ControlType.kPosition);
+        SparkMaxConfig config = new SparkMaxConfig();
+        // Configure the motor
+        config.idleMode(IdleMode.kBrake);
+        config.encoder.positionConversionFactor(DEG_PER_REVOLUTION); // All future angle references will be based off this
+        
+        // Set soft limits
+        config.enableSoftLimit(SparkMax.SoftLimitDirection.kForward, true);
+        config.enableSoftLimit(SparkMax.SoftLimitDirection.kReverse, true);
+        config.softLimit(SparkMax.SoftLimitDirection.kForward, TURRET_UPPER_BOUND_DEGREES);
+        config.softLimit(SparkMax.SoftLimitDirection.kReverse, TURRET_LOWER_BOUND_DEGREES);
+
+        // Configure PID
+        config.pid.p(K_P);
+        config.pid.i(K_I);
+        config.pid.d(K_D);
+        config.pid.ff(K_FF);
+        config.pid.positionPIDWrappingEnabled(false);
+        
+        m_turretMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        
+        m_turretMotorEncoder = m_turretMotor.getEncoder();
+        m_pidController = m_turretMotor.getPIDController();
+        
+        m_pidController.setReference(0, SparkPIDController.ControlType.kPosition);
         //doZeroRoutine(); TODO: Find out where to put this. Maybe command?
     }
 
@@ -66,7 +78,6 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        //TODO: Add SmartDashboard here
         SmartDashboard.putNumber("Turret/Angle", m_turretMotorEncoder.getPosition());
     }
 
@@ -116,7 +127,7 @@ public class Turret extends SubsystemBase {
         while (angle >= TURRET_UPPER_BOUND_DEGREES - 10) {
             angle -= 360.0;
         }
-        m_pidController.setReference(angle, ControlType.kPosition);
+        m_pidController.setReference(angle, SparkPIDController.ControlType.kPosition);
     }
 
     public void setTurretVelocity(int direction) {
