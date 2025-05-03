@@ -53,7 +53,7 @@ public class RobotContainer {
         return new Drive(
                 m_driveTrain,
                 () -> -modifyAxis(m_driverController.getLeftY()),
-                () -> -modifyAxis(m_driverController.getRightX()));
+                () -> -modifyAxis(-m_driverController.getRightX()));
     }
     
     private static double modifyAxis(double value) {

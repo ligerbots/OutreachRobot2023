@@ -66,7 +66,7 @@ public class Shooter extends SubsystemBase {
 
         m_shooter.getConfigurator().apply(shooterCurrentLimitConfigs);
 
-        m_flup = new SparkMax(Constants.TRANSFER_MOTOR_CAN_ID, MotorType.kBrushless);
+        m_flup = new SparkMax(Constants.SHOOTER_FLUP_CAN_ID, MotorType.kBrushless);
 
         SparkMaxConfig configSparkMax = new SparkMaxConfig();
         configSparkMax.inverted(true);
