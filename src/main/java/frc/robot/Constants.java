@@ -27,6 +27,7 @@ public final class Constants {
     
     // Shooter 
     public static final int SHOOTER_CAN_ID = 1; // Falcon
-    public static final int SHOOTER_FLUP_CAN_ID = 8; 
+    public static final int SHOOTER_FLUP_CAN_ID = 8;
     public static final int TURRET_MOTOR_CAN_ID = 9;
+    public static final int SHOOTER_HOOD_CAN_ID = 10;
 }
