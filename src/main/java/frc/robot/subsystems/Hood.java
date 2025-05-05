@@ -28,10 +28,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Turret extends SubsystemBase {
+public class Hood extends SubsystemBase {
     
     private static final double MIN_ANGLE_DEG = 100.0;
     private static final double MAX_ANGLE_DEG = 200.0;
+
+    private static final double GEAR_RATIO = 24.0 / 42.0; // 1.75:1
 
     // NOTE: All constants were taken from the 2023 arm 
     // Note: Current values for limits are refrenced with the shooter being flat
@@ -75,8 +77,7 @@ public class Turret extends SubsystemBase {
     private State m_currentState = new State();
 
     // Construct a new shooterPivot subsystem
-    public Turret() {
-
+    public Hood() {
         m_motor = new SparkMax(Constants.SHOOTER_HOOD_CAN_ID, MotorType.kBrushed);
 
         SparkMaxConfig config = new SparkMaxConfig();
@@ -85,7 +86,7 @@ public class Turret extends SubsystemBase {
         config.smartCurrentLimit(CURRENT_LIMIT);
 
         AbsoluteEncoderConfig absEncConfig = new AbsoluteEncoderConfig();
-        absEncConfig.velocityConversionFactor(1/60.0);   // convert rpm to rps
+        absEncConfig.velocityConversionFactor(1/60.0 * GEAR_RATIO);   // convert rpm to rps
         absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
         absEncConfig.inverted(false); //TODO: Verif
         // absEncConfig.setSparkMaxDataPortConfig();
@@ -122,7 +123,7 @@ public class Turret extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("pivot/testAngle", 0));
         // double oldGoalClipped = m_goalClipped.getDegrees();
         m_goalClipped = limitPivotAngle(m_goal);
 
