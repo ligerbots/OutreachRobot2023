@@ -30,8 +30,8 @@ import frc.robot.Constants;
 
 public class Hood extends SubsystemBase {
     
-    private static final double MIN_ANGLE_DEG = 100.0;
-    private static final double MAX_ANGLE_DEG = 200.0;
+    private static final double MIN_ANGLE_DEG = 0;
+    private static final double MAX_ANGLE_DEG = 60;
 
     private static final double GEAR_RATIO = 24.0 / 42.0; // 1.75:1
 
@@ -46,18 +46,18 @@ public class Hood extends SubsystemBase {
     // 25:1 planetary plus 42:18 sprockets
     // private static final double GEAR_RATIO = 25.0 * (42.0 / 18.0);
       
-    // Constants to limit the shooterPivot rotation speed
+    // Constants to limit the shooterhood rotation speed
     // max vel: 1 rotation = 10 seconds  and then gear_ratio
     private static final double MAX_VEL_ROT_PER_SEC = 1.5;
     private static final double MAX_ACC_ROT_PER_SEC2 = 3.0;
     private static final double ROBOT_LOOP_PERIOD = 0.02;
 
     // Zero point of the absolute encoder
-    private static final double ABS_ENCODER_ZERO_OFFSET = (225.1-180.0)/360.0; // FIXME: CHANGE 'ABS_ENCODER_ZERO_OFFSET' to a real value (this is from 2025)
+    private static final double ABS_ENCODER_ZERO_OFFSET = 164.35/360.0; 
     //0.5/360.0; //(135.2+180)/360.0; 
     
-    // Constants for the pivot PID controller
-    private static final double K_P = 5.0;
+    // Constants for the hood PID controller
+    private static final double K_P = 7.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
 
@@ -76,7 +76,7 @@ public class Hood extends SubsystemBase {
     private final TrapezoidProfile m_profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(MAX_VEL_ROT_PER_SEC, MAX_ACC_ROT_PER_SEC2));
     private State m_currentState = new State();
 
-    // Construct a new shooterPivot subsystem
+    // Construct a new shooterhood subsystem
     public Hood() {
         m_motor = new SparkMax(Constants.SHOOTER_HOOD_CAN_ID, MotorType.kBrushed);
 
@@ -87,6 +87,7 @@ public class Hood extends SubsystemBase {
 
         AbsoluteEncoderConfig absEncConfig = new AbsoluteEncoderConfig();
         absEncConfig.velocityConversionFactor(1/60.0 * GEAR_RATIO);   // convert rpm to rps
+        absEncConfig.positionConversionFactor(GEAR_RATIO);
         absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
         absEncConfig.inverted(false); //TODO: Verif
         // absEncConfig.setSparkMaxDataPortConfig();
@@ -115,17 +116,17 @@ public class Hood extends SubsystemBase {
         // updateMotorEncoderOffset();
         resetGoal();
 
-        SmartDashboard.putBoolean("pivot/coastMode", false);
+        SmartDashboard.putBoolean("hood/coastMode", false);
         setCoastMode();
 
-        SmartDashboard.putNumber("pivot/testAngle", 0);
+        SmartDashboard.putNumber("hood/testAngle", 0);
     }
 
     @Override
     public void periodic() {
-        m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("pivot/testAngle", 0));
+        m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("hood/testAngle", 0));
         // double oldGoalClipped = m_goalClipped.getDegrees();
-        m_goalClipped = limitPivotAngle(m_goal);
+        m_goalClipped = limithoodAngle(m_goal);
 
         // boolean goalChanged = Math.abs(m_goalClipped.getDegrees() - oldGoalClipped) > 5.0;
 
@@ -144,19 +145,19 @@ public class Hood extends SubsystemBase {
 
         // Display current values on the SmartDashboard
         // This also gets logged to the log file on the Rio and aids in replaying a match
-        SmartDashboard.putNumber("pivot/statePosition", m_currentState.position * 360.0);
-        SmartDashboard.putNumber("pivot/goalClipped", m_goalClipped.getDegrees());
-        SmartDashboard.putNumber("pivot/absoluteEncoder", angleDeg);
-        SmartDashboard.putNumber("pivot/outputCurrent", m_motor.getOutputCurrent());
-        SmartDashboard.putNumber("pivot/busVoltage", m_motor.getBusVoltage());
-        SmartDashboard.putBoolean("pivot/onGoal", angleWithinTolerance());
-        SmartDashboard.putNumber("pivot/appliedOutput", m_motor.getAppliedOutput());
-        SmartDashboard.putNumber("pivot/velocity", getVelocity().getDegrees());
-        // SmartDashboard.putNumber("pivot/feedforward", feedforward);
-        // SmartDashboard.putNumber("pivot/accel", accel);
+        SmartDashboard.putNumber("hood/statePosition", m_currentState.position * 360.0);
+        SmartDashboard.putNumber("hood/goalClipped", m_goalClipped.getDegrees());
+        SmartDashboard.putNumber("hood/absoluteEncoder", angleDeg);
+        SmartDashboard.putNumber("hood/outputCurrent", m_motor.getOutputCurrent());
+        SmartDashboard.putNumber("hood/busVoltage", m_motor.getBusVoltage());
+        SmartDashboard.putBoolean("hood/onGoal", angleWithinTolerance());
+        SmartDashboard.putNumber("hood/appliedOutput", m_motor.getAppliedOutput());
+        SmartDashboard.putNumber("hood/velocity", getVelocity().getDegrees());
+        // SmartDashboard.putNumber("hood/feedforward", feedforward);
+        // SmartDashboard.putNumber("hood/accel", accel);
     }
 
-    // get the current pivot angle
+    // get the current hood angle
     public Rotation2d getAngle() {
         return Rotation2d.fromRotations(m_absoluteEncoder.getPosition());
     }
@@ -170,10 +171,10 @@ public class Hood extends SubsystemBase {
         m_motor.set(speed);
     }
 
-    // set shooterPivot angle
+    // set shooterhood angle
     public void setAngle(Rotation2d angle) {
         m_goal = angle;
-        SmartDashboard.putNumber("pivot/goal", m_goal.getDegrees());
+        SmartDashboard.putNumber("hood/goal", m_goal.getDegrees());
     }
     
     // get the angle from the absolute encoder
@@ -182,7 +183,7 @@ public class Hood extends SubsystemBase {
     // }
 
     // needs to be public so that commands can get the restricted angle
-    public Rotation2d limitPivotAngle(Rotation2d angle) {
+    public Rotation2d limithoodAngle(Rotation2d angle) {
         return Rotation2d.fromDegrees(MathUtil.clamp(angle.getDegrees(), MIN_ANGLE_DEG, MAX_ANGLE_DEG));
     }
 
@@ -205,7 +206,7 @@ public class Hood extends SubsystemBase {
     }
 
     public void setCoastMode() {
-        boolean coastMode = SmartDashboard.getBoolean("shooterPivot/coastMode", false);
+        boolean coastMode = SmartDashboard.getBoolean("hood/coastMode", false);
         if (coastMode) {
             m_motor.configure(new SparkMaxConfig().idleMode(IdleMode.kCoast), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             m_motor.stopMotor();
