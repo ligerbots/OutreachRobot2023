@@ -55,7 +55,7 @@ public class Shooter extends SubsystemBase {
         slot0configs.kP = K_P;  // start small!!!
         slot0configs.kI = 0.0; // no output for integrated error
         slot0configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
-        slot0configs.kV = 1000/60; // feed forward gain
+        slot0configs.kV = 3/(1000/60); // feed forward gain
 
         m_shooter.getConfigurator().apply(config, 0.1);
 
@@ -69,7 +69,7 @@ public class Shooter extends SubsystemBase {
         m_flup = new SparkMax(Constants.SHOOTER_FLUP_CAN_ID, MotorType.kBrushless);
 
         SparkMaxConfig configSparkMax = new SparkMaxConfig();
-        configSparkMax.inverted(true);
+        configSparkMax.inverted(false);
         // always set a current limit
         // config.smartCurrentLimit(CURRENT_LIMIT);
         configSparkMax.idleMode(IdleMode.kBrake);
@@ -170,7 +170,7 @@ public class Shooter extends SubsystemBase {
     // }
 
     public void stopAll() {
-        setShooterRpm(0.0);
+        m_shooter.set(0);
         m_flup.set(0);
         // setHood(160);
         SmartDashboard.putString("shooter/Status", "Idle");
