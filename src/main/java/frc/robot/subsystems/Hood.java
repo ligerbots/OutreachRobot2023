@@ -53,13 +53,15 @@ public class Hood extends SubsystemBase {
     private static final double ROBOT_LOOP_PERIOD = 0.02;
 
     // Zero point of the absolute encoder
-    private static final double ABS_ENCODER_ZERO_OFFSET = 164.35/360.0; 
+    private static final double ABS_ENCODER_ZERO_OFFSET = 91/360.0; //FIXME: Find proper offset & diagnose scaling error
     //0.5/360.0; //(135.2+180)/360.0; 
     
     // Constants for the hood PID controller
-    private static final double K_P = 7.0;
+    private static final double K_P = 6.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
+    private static final double K_G = 3.0;
+    private static final double FF_OFFSET_DEG = 15.0;
 
     private final SparkMax m_motor;
     private final SparkAbsoluteEncoder m_absoluteEncoder;
@@ -89,7 +91,7 @@ public class Hood extends SubsystemBase {
         absEncConfig.velocityConversionFactor(1/60.0 * GEAR_RATIO);   // convert rpm to rps
         absEncConfig.positionConversionFactor(GEAR_RATIO);
         absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
-        absEncConfig.inverted(false); //TODO: Verif
+        absEncConfig.inverted(false); 
         // absEncConfig.setSparkMaxDataPortConfig();
         config.apply(absEncConfig);
         
@@ -138,14 +140,17 @@ public class Hood extends SubsystemBase {
 
         double angleDeg = getAngle().getDegrees();
 
-        // feedforward in Volts
-        double feedFowardsAdjustment = 0.1; // Adjust this value based on testing
-        double feedforward = feedFowardsAdjustment * Math.sin(Math.toRadians(angleDeg));
-
+        double feedforward = 0;
+        if (m_goalClipped.getDegrees() > 2) {
+            // feedforward in Volts
+            feedforward = K_G * Math.cos(Math.toRadians(m_goalClipped.getDegrees()-FF_OFFSET_DEG));
+        }
+        SmartDashboard.putNumber("hood/FeedForward", feedforward);
         m_controller.setReference(m_currentState.position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
 
         // Display current values on the SmartDashboard
         // This also gets logged to the log file on the Rio and aids in replaying a match
+        SmartDashboard.putNumber("hood/goal", m_goal.getDegrees());
         SmartDashboard.putNumber("hood/statePosition", m_currentState.position * 360.0);
         SmartDashboard.putNumber("hood/goalClipped", m_goalClipped.getDegrees());
         SmartDashboard.putNumber("hood/absoluteEncoder", angleDeg);
