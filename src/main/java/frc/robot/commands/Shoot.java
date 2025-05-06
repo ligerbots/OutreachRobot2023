@@ -13,10 +13,10 @@ public class Shoot extends Command {
         SHOOT
     }
     
-    private static final double DEFAULT_SHOOT_SPEED = 1000;
+    private static final double DEFAULT_SHOOT_SPEED = 2000;
     
     // time (seconds) it takes to shoot the ball after starting the flup
-    private static final double SHOOT_TIMER = 2;
+    private static final double SHOOT_TIMER = 1;
     private static final double SPIN_UP_TIMER = 2;
     
     private final Shooter m_shooter;

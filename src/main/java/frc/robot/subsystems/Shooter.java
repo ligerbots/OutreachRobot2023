@@ -42,7 +42,8 @@ public class Shooter extends SubsystemBase {
     private static final double SHOOTER_STATOR_CURRENT_LIMIT = 40.0;
 
     // PID Constants for the shooter PID controller
-    private static final double K_P = 0.12;
+    private static final double K_P = 0.15;
+    private static final double K_FF = 0.0113;
 
     // constructor
     public Shooter() {
@@ -55,7 +56,7 @@ public class Shooter extends SubsystemBase {
         slot0configs.kP = K_P;  // start small!!!
         slot0configs.kI = 0.0; // no output for integrated error
         slot0configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
-        slot0configs.kV = 3/(1000/60); // feed forward gain
+        slot0configs.kV = K_FF; // feed forward gain
 
         m_shooter.getConfigurator().apply(config, 0.1);
 
@@ -75,6 +76,8 @@ public class Shooter extends SubsystemBase {
         configSparkMax.idleMode(IdleMode.kBrake);
 
         m_flup.configure(configSparkMax, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        SmartDashboard.putNumber("shooter/setPoint", 0);
+
     }
 
     // called a lot
@@ -101,8 +104,7 @@ public class Shooter extends SubsystemBase {
     // }
 
     public double getSpeed() {
-        //return -m_shooterEncoder.getIntegratedSensorVelocity();
-        return -m_shooter.getVelocity().getValueAsDouble();
+        return m_shooter.getVelocity().getValueAsDouble() * 60;
     }
 
     public void prepareShooter(double distance) {
@@ -119,6 +121,7 @@ public class Shooter extends SubsystemBase {
     // does literally nothing
     public void setShooterRpm(double rpm) {
         m_shooter.setControl(new VelocityDutyCycle(rpm/60));
+        SmartDashboard.putNumber("shooter/setPoint", rpm);
     }
 
     public double calculateShooterSpeed(double distance) {
@@ -158,10 +161,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean speedOnTarget(final double targetVelocity, final double percentAllowedError) {
-        final double max = targetVelocity * (1.0 + (percentAllowedError / 100.0));
-        final double min = targetVelocity * (1.0 - (percentAllowedError / 100.0));
-        return m_shooter.getVelocity().getValueAsDouble() > max
-                && m_shooter.getVelocity().getValueAsDouble() < min; // this is wack cause it's negative
+        return Math.abs(getSpeed() - targetVelocity) < percentAllowedError*targetVelocity/100.0;
     }
 
     // public boolean hoodOnTarget(final double targetAngle) {
@@ -174,5 +174,6 @@ public class Shooter extends SubsystemBase {
         m_flup.set(0);
         // setHood(160);
         SmartDashboard.putString("shooter/Status", "Idle");
+        SmartDashboard.putNumber("shooter/setPoint", 0);
     }
 }
