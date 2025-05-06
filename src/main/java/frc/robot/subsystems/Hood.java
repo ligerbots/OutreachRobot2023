@@ -139,7 +139,8 @@ public class Hood extends SubsystemBase {
         double angleDeg = getAngle().getDegrees();
 
         // feedforward in Volts
-        double feedforward = 0;
+        double feedFowardsAdjustment = 0.1; // Adjust this value based on testing
+        double feedforward = feedFowardsAdjustment * Math.sin(Math.toRadians(angleDeg));
 
         m_controller.setReference(m_currentState.position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, feedforward);
 
