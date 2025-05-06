@@ -29,7 +29,6 @@ public class RobotContainer {
 
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     
-    
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         DriverStation.silenceJoystickConnectionWarning(true);

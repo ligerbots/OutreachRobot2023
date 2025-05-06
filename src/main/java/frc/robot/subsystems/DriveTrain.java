@@ -62,7 +62,6 @@ public class DriveTrain extends SubsystemBase {
         m_leftEncoder = m_leftMotor.getEncoder();
         m_rightEncoder = m_rightMotor.getEncoder();
         
-        //FIXME: Not sure what the second two arguments do, from looking at the docs they seem unnessary
         m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), 0, 0);
     }
     
