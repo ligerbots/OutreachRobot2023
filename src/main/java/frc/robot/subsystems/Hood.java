@@ -43,7 +43,7 @@ public class Hood extends SubsystemBase {
     private static final double ROBOT_LOOP_PERIOD = 0.02;
 
     // Zero point of the absolute encoder (in rotations)
-    private static final double ABS_ENCODER_ZERO_OFFSET = 91.0 / 360.0; //FIXME: Find proper offset & diagnose scaling error
+    private static final double ABS_ENCODER_ZERO_OFFSET = (164.7+3)/360; 
     
     // Constants for the hood PID controller
     private static final double K_P = 6.0;
