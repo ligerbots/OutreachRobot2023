@@ -74,8 +74,9 @@ public class Hood extends SubsystemBase {
         config.smartCurrentLimit(CURRENT_LIMIT);
 
         AbsoluteEncoderConfig absEncConfig = new AbsoluteEncoderConfig();
-        absEncConfig.velocityConversionFactor(GEAR_RATIO / 60.0);   // convert rpm to rps
-        absEncConfig.positionConversionFactor(GEAR_RATIO);
+        absEncConfig.velocityConversionFactor(1 / 60.0);   // convert rpm to rps
+        // absEncConfig.velocityConversionFactor(GEAR_RATIO / 60.0);
+        // absEncConfig.positionConversionFactor(GEAR_RATIO);
         absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
         absEncConfig.inverted(false); 
         // absEncConfig.setSparkMaxDataPortConfig();
@@ -86,7 +87,7 @@ public class Hood extends SubsystemBase {
 
         config.closedLoop.outputRange(-1, 1);
         config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
-        config.closedLoop.positionWrappingEnabled(false);  // don't treat it as a circle
+        config.closedLoop.positionWrappingEnabled(false);  // don't treat it as a circle TODO: Figure out what this means
         // config.closedLoop.positionWrappingInputRange(0,1.0);
                         
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -104,7 +105,7 @@ public class Hood extends SubsystemBase {
         m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("hood/testAngle", 0));
         m_goalClipped = limitHoodAngle(m_goal);
 
-        State goalState = new State(m_goalClipped.getRotations(), 0);
+        State goalState = new State(scaleToRaw(m_goalClipped), 0);
 
         // Trapezoid Profile
         m_currentState = m_profile.calculate(ROBOT_LOOP_PERIOD, m_currentState, goalState);
@@ -130,9 +131,26 @@ public class Hood extends SubsystemBase {
         SmartDashboard.putNumber("hood/feedforward", feedforward);
     }
 
+    private double scaleToRaw(Rotation2d angle) {
+        double angleRotations = angle.getRotations();
+        if (1/2 < angleRotations) {
+            return (angleRotations - 1) / GEAR_RATIO;
+        } else {
+            return angleRotations / GEAR_RATIO;
+        }
+    }
+
+    private Rotation2d scaleToDegrees(double angle) {
+        if (angle < 0) {
+            return Rotation2d.fromRotations((angle + 1) * GEAR_RATIO);
+        } else {
+            return Rotation2d.fromRotations(angle * GEAR_RATIO);
+        }
+    }
+
     // get the current hood angle
     public Rotation2d getAngle() {
-        return Rotation2d.fromRotations(m_absoluteEncoder.getPosition());
+        return scaleToDegrees(m_absoluteEncoder.getPosition());
     }
 
     // set shooterhood angle
