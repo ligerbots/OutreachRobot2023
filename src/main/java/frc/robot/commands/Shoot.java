@@ -82,6 +82,7 @@ public class Shoot extends Command {
     public void end(boolean interrupted) {
         m_shooter.stopAll();
         m_transfer.stop();
+        m_hood.stow();
         m_state = State.IDLE;
     }
     
