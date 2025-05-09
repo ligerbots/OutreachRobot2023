@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Transfer;
 
 public class Shoot extends Command {
     public enum State {
@@ -25,21 +26,23 @@ public class Shoot extends Command {
     private double m_hoodAngle;
     private final Shooter m_shooter;
     private double m_speed;
+    private final Transfer m_transfer;
     
     private State m_state = State.IDLE;
     private final Timer m_timer = new Timer();
     
-    public Shoot(Shooter shooter, Hood hood, double speed, double hoodAngle) {
+    public Shoot(Shooter shooter, Hood hood, Transfer transfer, double speed, double hoodAngle) {
         m_hood = hood;
         m_hoodAngle = hoodAngle;
         m_shooter = shooter;
         m_speed = speed;
+        m_transfer = transfer;
         addRequirements(shooter);
         // SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
-    public Shoot(Shooter shooter, Hood hood) {
-        this(shooter, hood, DEFAULT_SHOOT_SPEED, DEFAULT_HOOD_ANGLE);
+    public Shoot(Shooter shooter, Hood hood, Transfer transfer) {
+        this(shooter, hood, transfer, DEFAULT_SHOOT_SPEED, DEFAULT_HOOD_ANGLE);
     }
     
     // Called when the command is initially scheduled.
@@ -57,6 +60,8 @@ public class Shoot extends Command {
     public void execute() {
         if (m_state == State.SPIN_UP) {
             if (m_shooter.speedOnTarget(m_speed, 5) || m_timer.hasElapsed(SPIN_UP_TIMER)) {
+                // add start transfer
+                m_transfer.intake();
                 // start flup to shoot
                 m_shooter.shoot();
                 m_timer.restart();
@@ -76,6 +81,7 @@ public class Shoot extends Command {
     @Override
     public void end(boolean interrupted) {
         m_shooter.stopAll();
+        m_transfer.stop();
         m_state = State.IDLE;
     }
     
