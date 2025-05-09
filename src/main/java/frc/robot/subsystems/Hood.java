@@ -29,9 +29,10 @@ import frc.robot.Constants;
 public class Hood extends SubsystemBase {    
     private static final double GEAR_RATIO = 24.0 / 42.0; // 1.75:1
 
+    //NOTE FOR REUSE: ABS OFFSET HACK is a big hack, don't use it if avoidable & understand the wrapping issues
     private static final double ABS_ENCODER_OFFSET_HACK = 10;
     // Zero point of the absolute encoder (in rotations)
-    private static final double ABS_ENCODER_ZERO_OFFSET = (91.0 + ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0; //FIXME: Find proper offset & diagnose scaling error
+    private static final double ABS_ENCODER_ZERO_OFFSET = (164.7 - ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0; //FIXME: Find proper offset & diagnose scaling error
     
     private static final double MIN_ANGLE_DEG = 0 + ABS_ENCODER_OFFSET_HACK;
     private static final double MAX_ANGLE_DEG = 60 + ABS_ENCODER_OFFSET_HACK;
