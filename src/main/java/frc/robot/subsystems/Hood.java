@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.epilogue.logging.FileBackend;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -25,12 +26,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Hood extends SubsystemBase {
-    
-    private static final double MIN_ANGLE_DEG = 0;
-    private static final double MAX_ANGLE_DEG = 60;
-
+public class Hood extends SubsystemBase {    
     private static final double GEAR_RATIO = 24.0 / 42.0; // 1.75:1
+
+    private static final double ABS_ENCODER_OFFSET_HACK = 10;
+    // Zero point of the absolute encoder (in rotations)
+    private static final double ABS_ENCODER_ZERO_OFFSET = (91.0 + ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0; //FIXME: Find proper offset & diagnose scaling error
+    
+    private static final double MIN_ANGLE_DEG = 0 + ABS_ENCODER_OFFSET_HACK;
+    private static final double MAX_ANGLE_DEG = 60 + ABS_ENCODER_OFFSET_HACK;
+
 
     private static final double ANGLE_TOLERANCE_DEG = 1.0;
 
@@ -41,24 +46,21 @@ public class Hood extends SubsystemBase {
     private static final double MAX_VEL_ROT_PER_SEC = 1.5;
     private static final double MAX_ACC_ROT_PER_SEC2 = 3.0;
     private static final double ROBOT_LOOP_PERIOD = 0.02;
-
-    // Zero point of the absolute encoder (in rotations)
-    private static final double ABS_ENCODER_ZERO_OFFSET = 91.0 / 360.0; //FIXME: Find proper offset & diagnose scaling error
     
     // Constants for the hood PID controller
     private static final double K_P = 6.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_G = 3.0;
-    private static final double FF_OFFSET_DEG = 15.0;
+    private static final double FF_OFFSET_DEG = 15.0 + ABS_ENCODER_OFFSET_HACK;
 
     private final SparkMax m_motor;
     private final SparkAbsoluteEncoder m_absoluteEncoder;
     private final SparkClosedLoopController m_controller;
 
     // Used for checking if on goal
-    private Rotation2d m_goal = Rotation2d.fromDegrees(0);
-    private Rotation2d m_goalClipped = Rotation2d.fromDegrees(0);
+    private Rotation2d m_goal = Rotation2d.fromDegrees(0 + ABS_ENCODER_OFFSET_HACK);
+    private Rotation2d m_goalClipped = Rotation2d.fromDegrees(0 + ABS_ENCODER_OFFSET_HACK);
 
     // Trapezoid Profile
     private final TrapezoidProfile m_profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(MAX_VEL_ROT_PER_SEC, MAX_ACC_ROT_PER_SEC2));
@@ -110,7 +112,7 @@ public class Hood extends SubsystemBase {
         m_currentState = m_profile.calculate(ROBOT_LOOP_PERIOD, m_currentState, goalState);
 
         double feedforward = 0;
-        if (m_goalClipped.getDegrees() > 2) {
+        if (m_goalClipped.getDegrees() > 2 + ABS_ENCODER_OFFSET_HACK) {
             // feedforward in Volts
             feedforward = K_G * Math.cos(Math.toRadians(m_goalClipped.getDegrees() - FF_OFFSET_DEG));
         }

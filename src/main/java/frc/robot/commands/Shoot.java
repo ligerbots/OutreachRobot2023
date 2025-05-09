@@ -20,7 +20,7 @@ public class Shoot extends Command {
     private static final double SPIN_UP_TIMER = 2;
     
     private final Shooter m_shooter;
-    private final double m_speed;
+    private double m_speed;
     
     private State m_state = State.IDLE;
     private final Timer m_timer = new Timer();
@@ -29,6 +29,7 @@ public class Shoot extends Command {
         m_shooter = shooter;
         m_speed = speed;
         addRequirements(shooter);
+        SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
     public Shoot(Shooter shooter) {
@@ -38,6 +39,7 @@ public class Shoot extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
         m_shooter.setShooterRpm(m_speed);
         m_state = State.SPIN_UP;
         SmartDashboard.putString("shooter/state", m_state.toString());
