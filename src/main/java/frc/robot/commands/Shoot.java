@@ -1,9 +1,10 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Shooter;
 
 public class Shoot extends Command {
@@ -13,34 +14,40 @@ public class Shoot extends Command {
         SHOOT
     }
     
-    private static final double DEFAULT_SHOOT_SPEED = 4000;
+    private static final double DEFAULT_HOOD_ANGLE = 45;
+    private static final double DEFAULT_SHOOT_SPEED = 1750;
     
     // time (seconds) it takes to shoot the ball after starting the flup
     private static final double SHOOT_TIMER = 1;
     private static final double SPIN_UP_TIMER = 2;
     
+    private final Hood m_hood;
+    private double m_hoodAngle;
     private final Shooter m_shooter;
     private double m_speed;
     
     private State m_state = State.IDLE;
     private final Timer m_timer = new Timer();
     
-    public Shoot(Shooter shooter, double speed) {
+    public Shoot(Shooter shooter, Hood hood, double speed, double hoodAngle) {
+        m_hood = hood;
+        m_hoodAngle = hoodAngle;
         m_shooter = shooter;
         m_speed = speed;
         addRequirements(shooter);
-        SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
+        // SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
-    public Shoot(Shooter shooter) {
-        this(shooter, DEFAULT_SHOOT_SPEED);
+    public Shoot(Shooter shooter, Hood hood) {
+        this(shooter, hood, DEFAULT_SHOOT_SPEED, DEFAULT_HOOD_ANGLE);
     }
     
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
+        // m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
         m_shooter.setShooterRpm(m_speed);
+        m_hood.setAngle(Rotation2d.fromDegrees(m_hoodAngle));
         m_state = State.SPIN_UP;
         SmartDashboard.putString("shooter/state", m_state.toString());
         m_timer.restart();
