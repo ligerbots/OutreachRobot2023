@@ -27,13 +27,13 @@ public class Turret extends SubsystemBase {
 
   // Constants to limit the hood rotation speed
   // max vel: 1 rotation = 10 seconds and then gear_ratio
-  private static final double MAX_VEL_ROT_PER_SEC = 1.5;
+  private static final double MAX_VEL_ROT_PER_SEC = 4.0;
   private static final double MAX_ACC_ROT_PER_SEC2 = 3.0;
   private static final double ROBOT_LOOP_PERIOD = 0.02;
 
   private static final int CURRENT_LIMIT = 60;
 
-  private static final double GEAR_RATIO = 1/15 * 18/195;
+  private static final double GEAR_RATIO = 1.0 / 15.0 * 18.0 / 195.0;
 
   // Trapezoid Profile
   private final TrapezoidProfile m_profile = new TrapezoidProfile(
@@ -46,15 +46,14 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private SparkMax m_turretMotor;
 
-  private static final double MIN_ANGLE_DEG = -60;
-  private static final double MAX_ANGLE_DEG = 60;
+  private static final double MIN_ANGLE_DEG = -45.0;
+  private static final double MAX_ANGLE_DEG = 45.0;
 
-  private static final double K_P = 0.01;
+  private static final double K_P = 15.0;
   private static final double K_I = 0.0;
   private static final double K_D = 0.0;
 
   private final SparkClosedLoopController m_controller;
-
 
   public Turret() {
     m_turretMotor = new SparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -73,12 +72,12 @@ public class Turret extends SubsystemBase {
     config.closedLoop.positionWrappingEnabled(false); // don't treat it as a circle
     // config.closedLoop.positionWrappingInputRange(0,1.0);
 
-
     m_turretMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // controller for PID control
     m_controller = m_turretMotor.getClosedLoopController();
 
+    m_turretMotor.getEncoder().setPosition(0);
     SmartDashboard.putNumber("turret/testAngle", 0);
   }
 
@@ -94,12 +93,17 @@ public class Turret extends SubsystemBase {
     m_currentState = m_profile.calculate(ROBOT_LOOP_PERIOD, m_currentState, goalState);
 
     m_controller.setReference(m_currentState.position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
-    
-    SmartDashboard.putNumber("turret/currentAngle", 0);
-    SmartDashboard.putNumber("turret/goalAngle", 0);
+
+    SmartDashboard.putNumber("turret/currentAngle", getAngle().getDegrees());
+    SmartDashboard.putNumber("turret/goalAngle", m_goalClipped.getDegrees());
   }
 
   public Rotation2d limitAngle(Rotation2d angle) {
     return Rotation2d.fromDegrees(MathUtil.clamp(angle.getDegrees(), MIN_ANGLE_DEG, MAX_ANGLE_DEG));
-  } 
+  }
+
+  // get the current hood angle
+  public Rotation2d getAngle() {
+    return Rotation2d.fromRotations(m_turretMotor.getEncoder().getPosition());
+  }
 }

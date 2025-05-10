@@ -26,6 +26,7 @@ public class RobotContainer {
     private final Transfer m_transfer = new Transfer();
     private final Shooter m_shooter = new Shooter();
     private final Hood m_hood = new Hood();
+    private final Turret m_turret = new Turret();
 
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     
