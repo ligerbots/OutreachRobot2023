@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -45,10 +46,10 @@ public class RobotContainer {
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_transfer::outtake, m_transfer::stop, m_transfer));
 
         // m_driverController.rightTrigger().onTrue(new Shoot(m_shooter));
-        m_driverController.y().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 4500, 60)); // VERY FAR SHOT
-        m_driverController.x().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, 55)); // Normal far lob shot
-        m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, 55)); // Normal far lob shot
-        m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, 45)); // Close shot
+        m_driverController.y().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 4500, Rotation2d.fromDegrees(60))); // VERY FAR SHOT
+        m_driverController.x().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
+        m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
+        m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
     }
     
     public Command getDriveCommand() {
