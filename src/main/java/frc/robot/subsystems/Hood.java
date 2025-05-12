@@ -32,7 +32,7 @@ public class Hood extends SubsystemBase {
     //NOTE FOR REUSE: ABS OFFSET HACK is a big hack, don't use it if avoidable & understand the wrapping issues
     private static final double ABS_ENCODER_OFFSET_HACK = 10;
     // Zero point of the absolute encoder (in rotations)
-    private static final double ABS_ENCODER_ZERO_OFFSET = (164.7 - ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0; //FIXME: Find proper offset & diagnose scaling error
+    private static final double ABS_ENCODER_ZERO_OFFSET = (164.7 - ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0;
     
     private static final double MIN_ANGLE_DEG = 0 + ABS_ENCODER_OFFSET_HACK;
     private static final double MAX_ANGLE_DEG = 60 + ABS_ENCODER_OFFSET_HACK;
@@ -43,7 +43,6 @@ public class Hood extends SubsystemBase {
     private static final int CURRENT_LIMIT = 60;
     
     // Constants to limit the hood rotation speed
-    // max vel: 1 rotation = 10 seconds and then gear_ratio
     private static final double MAX_VEL_ROT_PER_SEC = 1.5;
     private static final double MAX_ACC_ROT_PER_SEC2 = 3.0;
     private static final double ROBOT_LOOP_PERIOD = 0.02;
@@ -67,7 +66,7 @@ public class Hood extends SubsystemBase {
     private final TrapezoidProfile m_profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(MAX_VEL_ROT_PER_SEC, MAX_ACC_ROT_PER_SEC2));
     private State m_currentState = new State();
 
-    // Construct a new shooterhood subsystem
+    // Construct a new Hood subsystem
     public Hood() {
         m_motor = new SparkMax(Constants.SHOOTER_HOOD_CAN_ID, MotorType.kBrushed);
 

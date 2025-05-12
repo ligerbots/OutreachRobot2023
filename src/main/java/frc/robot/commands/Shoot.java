@@ -15,7 +15,7 @@ public class Shoot extends Command {
         SHOOT
     }
     
-    private static final double DEFAULT_HOOD_ANGLE = 45;
+    private static final Rotation2d DEFAULT_HOOD_ANGLE = Rotation2d.fromDegrees(45);
     private static final double DEFAULT_SHOOT_SPEED = 1750;
     
     // time (seconds) it takes to shoot the ball after starting the flup
@@ -23,7 +23,7 @@ public class Shoot extends Command {
     private static final double SPIN_UP_TIMER = 2;
     
     private final Hood m_hood;
-    private double m_hoodAngle;
+    private Rotation2d m_hoodAngle;
     private final Shooter m_shooter;
     private double m_speed;
     private final Transfer m_transfer;
@@ -31,13 +31,13 @@ public class Shoot extends Command {
     private State m_state = State.IDLE;
     private final Timer m_timer = new Timer();
     
-    public Shoot(Shooter shooter, Hood hood, Transfer transfer, double speed, double hoodAngle) {
+    public Shoot(Shooter shooter, Hood hood, Transfer transfer, double speed, Rotation2d hoodAngle) {
         m_hood = hood;
         m_hoodAngle = hoodAngle;
         m_shooter = shooter;
         m_speed = speed;
         m_transfer = transfer;
-        addRequirements(shooter);
+        addRequirements(shooter, hood, transfer);
         // SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
@@ -50,7 +50,7 @@ public class Shoot extends Command {
     public void initialize() {
         // m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
         m_shooter.setShooterRpm(m_speed);
-        m_hood.setAngle(Rotation2d.fromDegrees(m_hoodAngle));
+        m_hood.setAngle(m_hoodAngle);
         m_state = State.SPIN_UP;
         SmartDashboard.putString("shooter/state", m_state.toString());
         m_timer.restart();

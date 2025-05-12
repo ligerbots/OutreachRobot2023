@@ -25,9 +25,8 @@ import frc.robot.Constants;
 
 public class Turret extends SubsystemBase {
 
-  // Constants to limit the hood rotation speed
-  // max vel: 1 rotation = 10 seconds and then gear_ratio
-  private static final double MAX_VEL_ROT_PER_SEC = 4.0;
+  // Constants to limit the turret rotation speed
+  private static final double MAX_VEL_ROT_PER_SEC = 0.5;
   private static final double MAX_ACC_ROT_PER_SEC2 = 3.0;
   private static final double ROBOT_LOOP_PERIOD = 0.02;
 
@@ -43,7 +42,6 @@ public class Turret extends SubsystemBase {
   private Rotation2d m_goal = Rotation2d.fromDegrees(0);
   private Rotation2d m_goalClipped = Rotation2d.fromDegrees(0);
 
-  /** Creates a new Turret. */
   private SparkMax m_turretMotor;
 
   private static final double MIN_ANGLE_DEG = -45.0;
@@ -55,6 +53,7 @@ public class Turret extends SubsystemBase {
 
   private final SparkClosedLoopController m_controller;
 
+  /** Creates a new Turret. */
   public Turret() {
     m_turretMotor = new SparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
