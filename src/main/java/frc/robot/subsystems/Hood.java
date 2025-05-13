@@ -98,12 +98,12 @@ public class Hood extends SubsystemBase {
         // controller for PID control
         m_controller = m_motor.getClosedLoopController();
 
-        // SmartDashboard.putNumber("hood/testAngle", 0);
+        SmartDashboard.putNumber("hood/testAngle", 0);
     }
 
     @Override
     public void periodic() {
-        // m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("hood/testAngle", 0));
+        m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("hood/testAngle", 0));
         m_goalClipped = limitHoodAngle(m_goal);
 
         State goalState = new State(m_goalClipped.getRotations(), 0);

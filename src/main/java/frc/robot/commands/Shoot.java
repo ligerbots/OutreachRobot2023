@@ -38,7 +38,7 @@ public class Shoot extends Command {
         m_speed = speed;
         m_transfer = transfer;
         addRequirements(shooter, hood, transfer);
-        // SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
+        SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
     public Shoot(Shooter shooter, Hood hood, Transfer transfer) {
@@ -48,7 +48,7 @@ public class Shoot extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        // m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
+        m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
         m_shooter.setShooterRpm(m_speed);
         m_hood.setAngle(m_hoodAngle);
         m_state = State.SPIN_UP;
