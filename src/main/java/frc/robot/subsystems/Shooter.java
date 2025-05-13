@@ -36,13 +36,13 @@ public class Shooter extends SubsystemBase {
     TreeMap<Double, Double> m_turretAngleLookup = new TreeMap<Double, Double>() {
     };
 
-    private static final double SHOOTER_STATOR_CURRENT_LIMIT = 40.0;
+    private static final double SHOOTER_STATOR_CURRENT_LIMIT = 60.0;
 
     // Constants for the shooter PID controller
     private static final double K_P = 0.15;
     private static final double K_FF = 0.0113;
 
-    private static final double FLUP_SPEED = 0.5;
+    private static final double FLUP_SPEED = 1.0;
 
     // constructor
     public Shooter() {
