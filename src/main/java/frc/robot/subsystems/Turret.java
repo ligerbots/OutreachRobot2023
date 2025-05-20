@@ -44,8 +44,8 @@ public class Turret extends SubsystemBase {
 
   private SparkMax m_turretMotor;
 
-  private static final double MIN_ANGLE_DEG = -45.0;
-  private static final double MAX_ANGLE_DEG = 45.0;
+  private static final double MIN_ANGLE_DEG = -10.0; //Note: This can be -45 at max. We are using 10 as it may not be setup correctly
+  private static final double MAX_ANGLE_DEG = 10.0; //Note: This can be 45 at max. We are using 10 as it may not be setup correctly
 
   private static final double K_P = 15.0;
   private static final double K_I = 0.0;
@@ -83,7 +83,7 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("turret/testAngle", 0));
+    // m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("turret/testAngle", 0));
     m_goalClipped = limitAngle(m_goal);
 
     State goalState = new State(m_goalClipped.getRotations(), 0);
@@ -99,6 +99,10 @@ public class Turret extends SubsystemBase {
 
   public Rotation2d limitAngle(Rotation2d angle) {
     return Rotation2d.fromDegrees(MathUtil.clamp(angle.getDegrees(), MIN_ANGLE_DEG, MAX_ANGLE_DEG));
+  }
+
+  public void setAngle(Rotation2d angle) {
+    m_goal = limitAngle(angle);
   }
 
   // get the current hood angle

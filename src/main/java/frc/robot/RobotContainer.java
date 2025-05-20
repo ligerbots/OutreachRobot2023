@@ -50,6 +50,9 @@ public class RobotContainer {
         m_driverController.x().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
         m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
         m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
+
+        m_driverController.rightTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromRotations(10 / 60 * .02)));
+        m_driverController.leftTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromRotations(-10 / 60 * .02)));
     }
     
     public Command getDriveCommand() {
