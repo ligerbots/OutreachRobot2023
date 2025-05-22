@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrain;
 
@@ -15,6 +16,7 @@ public class Drive extends Command {
   DriveTrain m_driveTrain;
   DoubleSupplier m_throttle;
   DoubleSupplier m_turn;
+  SlewRateLimiter m_filter = new SlewRateLimiter(0.5);
 
   public Drive(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
     m_driveTrain = driveTrain;
@@ -33,7 +35,7 @@ public class Drive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_driveTrain.allDrive(m_throttle.getAsDouble(), m_turn.getAsDouble(), false);
+    m_driveTrain.allDrive(m_filter.calculate(m_throttle.getAsDouble()), m_turn.getAsDouble(), false);
   }
 
   // Called once the command ends or is interrupted.
