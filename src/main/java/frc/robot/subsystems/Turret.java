@@ -44,8 +44,8 @@ public class Turret extends SubsystemBase {
 
   private SparkMax m_turretMotor;
 
-  private static final double MIN_ANGLE_DEG = -10.0; //Note: This can be -45 at max. We are using 10 as it may not be setup correctly
-  private static final double MAX_ANGLE_DEG = 10.0; //Note: This can be 45 at max. We are using 10 as it may not be setup correctly
+  private static final double MIN_ANGLE_DEG = -45.0; //Note: This can be -45 at max. We are using 10 as it may not be setup correctly
+  private static final double MAX_ANGLE_DEG = 45.0; //Note: This can be 45 at max. We are using 10 as it may not be setup correctly
 
   private static final double K_P = 15.0;
   private static final double K_I = 0.0;
@@ -77,7 +77,7 @@ public class Turret extends SubsystemBase {
     m_controller = m_turretMotor.getClosedLoopController();
 
     m_turretMotor.getEncoder().setPosition(0);
-    SmartDashboard.putNumber("turret/testAngle", 0);
+    // SmartDashboard.putNumber("turret/testAngle", 0);
   }
 
   @Override

@@ -25,6 +25,8 @@ public class RotateTurret extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("Starting rotate");
     m_turret.setAngle(m_turret.getAngle().plus(m_rotationDiff));
+    System.out.println("Rotating");
   }
 }
