@@ -44,6 +44,8 @@ public class RobotContainer {
     private void configureBindings() {
         m_driverController.rightBumper().whileTrue(new StartEndCommand(m_transfer::intake, m_transfer::stop, m_transfer));
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_transfer::outtake, m_transfer::stop, m_transfer));
+        m_driverController.rightTrigger().whileTrue(new StartEndCommand(m_transfer::intake, m_transfer::stop, m_transfer));
+        m_driverController.leftTrigger().whileTrue(new StartEndCommand(m_transfer::outtake, m_transfer::stop, m_transfer));
 
         // m_driverController.rightTrigger().onTrue(new Shoot(m_shooter));
         m_driverController.y().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 4500, Rotation2d.fromDegrees(60))); // VERY FAR SHOT
@@ -51,8 +53,10 @@ public class RobotContainer {
         m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
         m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
 
-        m_driverController.rightTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
-        m_driverController.leftTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
+        // m_driverController.rightTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
+        // m_driverController.leftTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
+        m_driverController.povLeft().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
+        m_driverController.povRight().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
     }
     
     public Command getDriveCommand() {
@@ -61,8 +65,8 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_driverController.getLeftY()),
-                () -> -modifyAxis(-m_driverController.getRightX()));
+                () -> -modifyAxis(m_driverController.getLeftY() * 2.0/3.0),
+                () -> -modifyAxis(-m_driverController.getLeftX() * 0.5));
     }
     
     private static double modifyAxis(double value) {

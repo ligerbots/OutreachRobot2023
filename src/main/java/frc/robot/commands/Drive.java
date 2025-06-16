@@ -16,7 +16,7 @@ public class Drive extends Command {
   DriveTrain m_driveTrain;
   DoubleSupplier m_throttle;
   DoubleSupplier m_turn;
-  SlewRateLimiter m_filter = new SlewRateLimiter(2);
+  SlewRateLimiter m_filter = new SlewRateLimiter(1.5);
 
   public Drive(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
     m_driveTrain = driveTrain;
