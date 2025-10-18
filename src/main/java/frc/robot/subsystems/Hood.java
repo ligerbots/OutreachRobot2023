@@ -78,7 +78,7 @@ public class Hood extends SubsystemBase {
         AbsoluteEncoderConfig absEncConfig = new AbsoluteEncoderConfig();
         absEncConfig.velocityConversionFactor(GEAR_RATIO / 60.0);   // convert rpm to rps
         absEncConfig.positionConversionFactor(GEAR_RATIO);
-        absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
+        // absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
         absEncConfig.inverted(false); 
         // absEncConfig.setSparkMaxDataPortConfig();
         config.apply(absEncConfig);
@@ -94,6 +94,17 @@ public class Hood extends SubsystemBase {
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_absoluteEncoder = m_motor.getAbsoluteEncoder();
+
+        // We will assume that the hood is all the way down when we start the robot.
+        // Read the current encoder value in degrees
+        double zeroEncoder = m_absoluteEncoder.getPosition() * 360.0;
+        // Set the zero offset such that the absolute encoder reads ABS_ENCODER_OFFSET_HACK
+        // Note that the zeroOffset is in rotations
+        absEncConfig.zeroOffset((zeroEncoder - ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0);
+        // Apply the new absolute encoder setting to the config
+        config.apply(absEncConfig);
+        // Apply the new config to the motor
+        m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // controller for PID control
         m_controller = m_motor.getClosedLoopController();
