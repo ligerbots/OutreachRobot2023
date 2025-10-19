@@ -16,7 +16,8 @@ public class Drive extends Command {
   DriveTrain m_driveTrain;
   DoubleSupplier m_throttle;
   DoubleSupplier m_turn;
-  SlewRateLimiter m_filter = new SlewRateLimiter(1.5);
+  SlewRateLimiter m_driveFilter = new SlewRateLimiter(1.5);
+  SlewRateLimiter m_turnFilter = new SlewRateLimiter(1.5);
 
   public Drive(DriveTrain driveTrain, DoubleSupplier throttle, DoubleSupplier turn){
     m_driveTrain = driveTrain;
@@ -35,7 +36,7 @@ public class Drive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_driveTrain.allDrive(m_filter.calculate(m_throttle.getAsDouble()), m_turn.getAsDouble(), false);
+    m_driveTrain.allDrive(m_driveFilter.calculate(m_throttle.getAsDouble()), m_turnFilter.calculate(m_turn.getAsDouble()), false);
   }
 
   // Called once the command ends or is interrupted.

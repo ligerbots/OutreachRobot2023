@@ -53,8 +53,6 @@ public class RobotContainer {
         m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
         m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
 
-        // m_driverController.rightTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
-        // m_driverController.leftTrigger().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
         m_driverController.povLeft().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
         m_driverController.povRight().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
     }
@@ -65,8 +63,8 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_driverController.getLeftY() * 2.0/3.0),
-                () -> -modifyAxis(-m_driverController.getLeftX() * 0.5));
+                () -> -modifyAxis(m_driverController.getLeftY()),
+                () -> -modifyAxis(m_driverController.getLeftX()));
     }
     
     private static double modifyAxis(double value) {
