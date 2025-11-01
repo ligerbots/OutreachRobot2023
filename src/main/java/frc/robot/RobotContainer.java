@@ -58,8 +58,12 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_driverController.getLeftY()),
-                () -> -modifyAxis(-m_driverController.getRightX()));
+                () -> -modifyAxis(0),
+                () -> -modifyAxis(0));
+        // return new Drive(
+        //         m_driveTrain,
+        //         () -> -modifyAxis(m_driverController.getLeftY()),
+        //         () -> -modifyAxis(-m_driverController.getRightX()));
     }
     
     private static double modifyAxis(double value) {
