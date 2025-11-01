@@ -102,7 +102,7 @@ public class Turret extends SubsystemBase {
   }
 
   // get the current hood angle
-  public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(m_turretMotor.getEncoder().getPosition());
-  }
+  // public Rotation2d getAngle() {
+  //   return Rotation2d.fromRotations(m_turretMotor.getEncoder().getPosition());
+  // }
 }

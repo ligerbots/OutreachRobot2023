@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Transfer;
 
@@ -22,8 +21,8 @@ public class Shoot extends Command {
     private static final double SHOOT_TIMER = 1;
     private static final double SPIN_UP_TIMER = 2;
     
-    private final Hood m_hood;
-    private Rotation2d m_hoodAngle;
+    // private final Hood m_hood;
+    // private Rotation2d m_hoodAngle;
     private final Shooter m_shooter;
     private double m_speed;
     private final Transfer m_transfer;
@@ -31,18 +30,18 @@ public class Shoot extends Command {
     private State m_state = State.IDLE;
     private final Timer m_timer = new Timer();
     
-    public Shoot(Shooter shooter, Hood hood, Transfer transfer, double speed, Rotation2d hoodAngle) {
-        m_hood = hood;
-        m_hoodAngle = hoodAngle;
+    public Shoot(Shooter shooter, Transfer transfer, double speed, Rotation2d hoodAngle) {
+        // m_hood = hood;
+        // m_hoodAngle = hoodAngle;
         m_shooter = shooter;
         m_speed = speed;
         m_transfer = transfer;
-        addRequirements(shooter, hood, transfer);
+        addRequirements(shooter, transfer);
         // SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
-    public Shoot(Shooter shooter, Hood hood, Transfer transfer) {
-        this(shooter, hood, transfer, DEFAULT_SHOOT_SPEED, DEFAULT_HOOD_ANGLE);
+    public Shoot(Shooter shooter, Transfer transfer) {
+        this(shooter, transfer, DEFAULT_SHOOT_SPEED, DEFAULT_HOOD_ANGLE);
     }
     
     // Called when the command is initially scheduled.
@@ -50,7 +49,6 @@ public class Shoot extends Command {
     public void initialize() {
         // m_speed = SmartDashboard.getNumber("shooter/RPM_TEST", DEFAULT_SHOOT_SPEED);
         m_shooter.setShooterRpm(m_speed);
-        m_hood.setAngle(m_hoodAngle);
         m_state = State.SPIN_UP;
         SmartDashboard.putString("shooter/state", m_state.toString());
         m_timer.restart();
@@ -82,7 +80,6 @@ public class Shoot extends Command {
     public void end(boolean interrupted) {
         m_shooter.stopAll();
         m_transfer.stop();
-        m_hood.stow();
         m_state = State.IDLE;
     }
     
