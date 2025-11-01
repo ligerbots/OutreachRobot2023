@@ -4,11 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -30,11 +25,6 @@ public class Shooter extends SubsystemBase {
     TalonFX m_shooter;
     // the thing that actually does the shooting
     SparkMax m_flup;
-
-    TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double, Double[]>() {
-    }; // set up lookup table for ranges
-    TreeMap<Double, Double> m_turretAngleLookup = new TreeMap<Double, Double>() {
-    };
 
     private static final double SHOOTER_STATOR_CURRENT_LIMIT = 60.0;
 
@@ -91,11 +81,6 @@ public class Shooter extends SubsystemBase {
         return m_shooter.getVelocity().getValueAsDouble() * 60;
     }
 
-    public void prepareShooter(double distance) {
-        // Set the shooter and hood based on the distance
-        setShooterRpm(calculateShooterSpeed(distance));
-        // setHood(calculateShooterHood(distance));
-    }
 
     // SHOOT!!!!!!!!!!
     public void shoot() {
@@ -106,24 +91,6 @@ public class Shooter extends SubsystemBase {
         // speed expected in RPS, so convert
         m_shooter.setControl(new VelocityDutyCycle(rpm / 60.0));
         SmartDashboard.putNumber("shooter/setPoint", rpm);
-    }
-
-    public double calculateShooterSpeed(double distance) {
-        Entry<Double, Double[]> floorEntry = m_distanceLookUp.floorEntry(distance);
-        Entry<Double, Double[]> ceilingEntry = m_distanceLookUp.higherEntry(distance);
-
-        if (floorEntry == null || ceilingEntry == null) {
-            DriverStation.reportError("Shooter: floorEntry or ceilingEntry was null", false);
-            // Typical speed. Not sure this will work for much, but it won't break anything.
-            return 3000.0;
-        }
-
-        double ratio = MathUtil.inverseInterpolate(floorEntry.getKey(), ceilingEntry.getKey(), distance);
-        double rpmTarget = MathUtil.interpolate(floorEntry.getValue()[0], ceilingEntry.getValue()[0], ratio);
-
-        System.out.format("Shooter: ratio %3.2f, floor %4.1f, dist %4.1f, ceiling %4.1f, RPM %4.1f",
-                ratio, floorEntry.getKey(), distance, ceilingEntry.getKey(), rpmTarget);
-        return rpmTarget;
     }
 
     public boolean speedOnTarget(final double targetVelocity, final double percentAllowedError) {

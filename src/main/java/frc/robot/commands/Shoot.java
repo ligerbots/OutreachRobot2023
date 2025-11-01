@@ -1,6 +1,11 @@
 package frc.robot.commands;
 
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +27,10 @@ public class Shoot extends Command {
     private static final double SHOOT_TIMER = 1.0;
     private static final double SPIN_UP_TIMER = 3.0;
     
+    // Lookup tables for distance-based shooter control
+    private final TreeMap<Double, Double[]> m_distanceLookUp = new TreeMap<Double, Double[]>();
+    private final TreeMap<Double, Double> m_hoodAngleLookup = new TreeMap<Double, Double>();
+    
     private final Hood m_hood;
     private Rotation2d m_hoodAngle;
     private final Shooter m_shooter;
@@ -38,6 +47,23 @@ public class Shoot extends Command {
         m_speed = speed;
         m_transfer = transfer;
         addRequirements(shooter, hood, transfer);
+        
+        // Initialize shooter lookup table with example values
+        // Distance (feet) -> [RPM, ...]
+        m_distanceLookUp.put(5.0, new Double[]{2000.0});
+        m_distanceLookUp.put(10.0, new Double[]{2500.0});
+        m_distanceLookUp.put(15.0, new Double[]{3000.0});
+        m_distanceLookUp.put(20.0, new Double[]{3500.0});
+        m_distanceLookUp.put(25.0, new Double[]{4000.0});
+        
+        // Initialize hood angle lookup table
+        // Distance (feet) -> Hood Angle (degrees)
+        m_hoodAngleLookup.put(5.0, 15.0);
+        m_hoodAngleLookup.put(10.0, 20.0);
+        m_hoodAngleLookup.put(15.0, 25.0);
+        m_hoodAngleLookup.put(20.0, 28.0);
+        m_hoodAngleLookup.put(25.0, 30.0);
+        
         SmartDashboard.putNumber("shooter/RPM_TEST", m_speed);
     }
     
@@ -90,5 +116,41 @@ public class Shoot extends Command {
     @Override
     public boolean isFinished() {
         return m_state == State.IDLE;
+    }
+
+    public double calculateShooterSpeed(double distance) {
+        Entry<Double, Double[]> floorEntry = m_distanceLookUp.floorEntry(distance);
+        Entry<Double, Double[]> ceilingEntry = m_distanceLookUp.higherEntry(distance);
+
+        if (floorEntry == null || ceilingEntry == null) {
+            DriverStation.reportError("Shoot: floorEntry or ceilingEntry was null", false);
+            // Typical speed. Not sure this will work for much, but it won't break anything.
+            return 3000.0;
+        }
+
+        double ratio = MathUtil.inverseInterpolate(floorEntry.getKey(), ceilingEntry.getKey(), distance);
+        double rpmTarget = MathUtil.interpolate(floorEntry.getValue()[0], ceilingEntry.getValue()[0], ratio);
+
+        System.out.format("Shoot: ratio %3.2f, floor %4.1f, dist %4.1f, ceiling %4.1f, RPM %4.1f",
+                ratio, floorEntry.getKey(), distance, ceilingEntry.getKey(), rpmTarget);
+        return rpmTarget;
+    }
+
+    public double calculateHoodAngle(double distance) {
+        Entry<Double, Double> floorEntry = m_hoodAngleLookup.floorEntry(distance);
+        Entry<Double, Double> ceilingEntry = m_hoodAngleLookup.higherEntry(distance);
+
+        if (floorEntry == null || ceilingEntry == null) {
+            DriverStation.reportError("Shoot: Hood floorEntry or ceilingEntry was null", false);
+            // Default hood angle
+            return 20.0;
+        }
+
+        double ratio = MathUtil.inverseInterpolate(floorEntry.getKey(), ceilingEntry.getKey(), distance);
+        double hoodAngle = MathUtil.interpolate(floorEntry.getValue(), ceilingEntry.getValue(), ratio);
+
+        System.out.format("Shoot: Hood ratio %3.2f, floor %4.1f, dist %4.1f, ceiling %4.1f, angle %4.1f",
+                ratio, floorEntry.getKey(), distance, ceilingEntry.getKey(), hoodAngle);
+        return hoodAngle;
     }
 }
