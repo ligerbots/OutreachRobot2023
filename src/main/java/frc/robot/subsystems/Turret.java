@@ -93,7 +93,7 @@ public class Turret extends SubsystemBase {
 
     m_controller.setReference(m_currentState.position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
-    SmartDashboard.putNumber("turret/currentAngle", getAngle().getDegrees());
+//    SmartDashboard.putNumber("turret/currentAngle", getAngle().getDegrees());
     SmartDashboard.putNumber("turret/goalAngle", m_goalClipped.getDegrees());
   }
 
