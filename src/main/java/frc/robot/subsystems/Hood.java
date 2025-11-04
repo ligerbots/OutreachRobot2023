@@ -68,7 +68,7 @@ public class Hood extends SubsystemBase {
 
     // Construct a new Hood subsystem
     public Hood() {
-        m_motor = new SparkMax(Constants.SHOOTER_HOOD_CAN_ID, MotorType.kBrushed);
+        m_motor = new SparkMax(Constants.SHOOTER_HOOD_CAN_ID, MotorType.kBrushless);
 
         SparkMaxConfig config = new SparkMaxConfig();
         config.inverted(true);
