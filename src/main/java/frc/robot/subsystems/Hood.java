@@ -78,7 +78,6 @@ public class Hood extends SubsystemBase {
         // set up the PID for MAX Motion
         config.closedLoop.p(K_P).i(K_I).d(K_D);
         config.closedLoop.outputRange(-1, 1);
-        config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         config.closedLoop.positionWrappingEnabled(false);  // don't treat it as a circle
         // config.closedLoop.positionWrappingInputRange(0,1.0);
                        
