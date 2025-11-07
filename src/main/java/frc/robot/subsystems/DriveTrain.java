@@ -41,6 +41,9 @@ public class DriveTrain extends SubsystemBase {
     
     private static final int CURRENT_LIMIT = 35;
     
+    private static final double MAX_DRIVE_SPEED = 0.66;
+    private static final double MAX_TURN_SPEED = 0.66;
+
     private static final double DRIVE_GEAR_REDUCTION = 1/19.527; //TODO: Double check number
     private static final double METER_PER_REVOLUTION = (Units.inchesToMeters(8)*Math.PI) * DRIVE_GEAR_REDUCTION;
     
@@ -115,7 +118,7 @@ public class DriveTrain extends SubsystemBase {
     
     
     public void allDrive(double throttle, double rotate, boolean squaredInputs) {
-        m_robotDrive.arcadeDrive(throttle, -rotate, squaredInputs);
+        m_robotDrive.arcadeDrive(MAX_DRIVE_SPEED * throttle, MAX_TURN_SPEED * rotate, squaredInputs);
     }
     
     public double turnSpeedCalc(double angleError) {
