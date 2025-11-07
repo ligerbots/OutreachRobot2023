@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Hood extends SubsystemBase {    
-    private static final double GEAR_RATIO = 24.0 / 42.0; // 1.75:1
+    private static final double GEAR_RATIO = 1.0 / 280.0; // 7:1 * 4:1 * 10:1 = 280: 1
 
     //NOTE FOR REUSE: ABS OFFSET HACK is a big hack, don't use it if avoidable & understand the wrapping issues
     private static final double ABS_ENCODER_OFFSET_HACK = 10;
