@@ -31,8 +31,6 @@ public class Hood extends SubsystemBase {
 
     //NOTE FOR REUSE: ABS OFFSET HACK is a big hack, don't use it if avoidable & understand the wrapping issues
     private static final double ABS_ENCODER_OFFSET_HACK = 10;
-    // Zero point of the absolute encoder (in rotations)
-    private static final double ABS_ENCODER_ZERO_OFFSET = (164.7 - ABS_ENCODER_OFFSET_HACK / GEAR_RATIO) / 360.0;
     
     private static final double MIN_ANGLE_DEG = 0 + ABS_ENCODER_OFFSET_HACK;
     private static final double MAX_ANGLE_DEG = 60 + ABS_ENCODER_OFFSET_HACK;
@@ -55,7 +53,7 @@ public class Hood extends SubsystemBase {
     private static final double FF_OFFSET_DEG = 15.0 + ABS_ENCODER_OFFSET_HACK;
 
     private final SparkMax m_motor;
-    private final SparkAbsoluteEncoder m_absoluteEncoder;
+
     private final SparkClosedLoopController m_controller;
 
     // Used for checking if on goal
@@ -74,30 +72,25 @@ public class Hood extends SubsystemBase {
         config.inverted(true);
         config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(CURRENT_LIMIT);
+        config.encoder.positionConversionFactor(GEAR_RATIO);
+        config.encoder.velocityConversionFactor(GEAR_RATIO);
 
-        AbsoluteEncoderConfig absEncConfig = new AbsoluteEncoderConfig();
-        absEncConfig.velocityConversionFactor(GEAR_RATIO / 60.0);   // convert rpm to rps
-        absEncConfig.positionConversionFactor(GEAR_RATIO);
-        absEncConfig.zeroOffset(ABS_ENCODER_ZERO_OFFSET);
-        absEncConfig.inverted(false); 
-        // absEncConfig.setSparkMaxDataPortConfig();
-        config.apply(absEncConfig);
-        
         // set up the PID for MAX Motion
         config.closedLoop.p(K_P).i(K_I).d(K_D);
-
         config.closedLoop.outputRange(-1, 1);
         config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         config.closedLoop.positionWrappingEnabled(false);  // don't treat it as a circle
         // config.closedLoop.positionWrappingInputRange(0,1.0);
-                        
+                       
         m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        m_absoluteEncoder = m_motor.getAbsoluteEncoder();
+       
 
         // controller for PID control
         m_controller = m_motor.getClosedLoopController();
 
+        //Hack for making sure it doesn't break
+        m_motor.getEncoder().setPosition(Rotation2d.fromDegrees(ABS_ENCODER_OFFSET_HACK).getRotations());
         // SmartDashboard.putNumber("hood/testAngle", 0);
     }
 
@@ -134,7 +127,7 @@ public class Hood extends SubsystemBase {
 
     // get the current hood angle
     public Rotation2d getAngle() {
-        return Rotation2d.fromRotations(m_absoluteEncoder.getPosition());
+        return Rotation2d.fromRotations(m_motor.getEncoder().getPosition());
     }
 
     // set shooterhood angle
