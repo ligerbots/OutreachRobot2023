@@ -31,6 +31,8 @@ public class Hood extends SubsystemBase {
 
     //NOTE FOR REUSE: ABS OFFSET HACK is a big hack, don't use it if avoidable & understand the wrapping issues
     private static final double ABS_ENCODER_OFFSET_HACK = 10;
+    // Zero point of the absolute encoder (in rotations)
+    private static final double ABS_ENCODER_ZERO_OFFSET = ((171 - ABS_ENCODER_OFFSET_HACK) / GEAR_RATIO) / 360.0;
     
     private static final double MIN_ANGLE_DEG = 0 + ABS_ENCODER_OFFSET_HACK;
     private static final double MAX_ANGLE_DEG = 60 + ABS_ENCODER_OFFSET_HACK;
