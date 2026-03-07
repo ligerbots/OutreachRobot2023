@@ -41,8 +41,8 @@ public class DriveTrain extends SubsystemBase {
     
     private static final int CURRENT_LIMIT = 35;
     
-    private static final double MAX_DRIVE_SPEED = 0.66;
-    private static final double MAX_TURN_SPEED = 0.66;
+    private static final double MAX_DRIVE_SPEED = 0.5;
+    private static final double MAX_TURN_SPEED = 1.0;
 
     private static final double DRIVE_GEAR_REDUCTION = 1/19.527; //TODO: Double check number
     private static final double METER_PER_REVOLUTION = (Units.inchesToMeters(8)*Math.PI) * DRIVE_GEAR_REDUCTION;
