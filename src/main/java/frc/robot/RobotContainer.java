@@ -22,14 +22,18 @@ import frc.robot.subsystems.*;
 */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    // private final Intake m_intake = new Intake();
+    // private final Intake m_intake = new Intake();    
+    
+    private final CommandXboxController m_driverController = new CommandXboxController(0);
+    private final CommandXboxController m_driverControllerTurret = new CommandXboxController(1);
+
     private final DriveTrain m_driveTrain = new DriveTrain();
     private final Transfer m_transfer = new Transfer();
     private final Shooter m_shooter = new Shooter();
     private final Hood m_hood = new Hood();
-    private final Turret m_turret = new Turret();
+    private final Turret m_turret = new Turret(m_driverControllerTurret::getLeftX);
 
-    private final CommandXboxController m_driverController = new CommandXboxController(0);
+
     
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -48,13 +52,13 @@ public class RobotContainer {
         m_driverController.leftTrigger().whileTrue(new StartEndCommand(m_transfer::outtake, m_transfer::stop, m_transfer));
 
         // m_driverController.rightTrigger().onTrue(new Shoot(m_shooter));
-        m_driverController.y().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 4500, Rotation2d.fromDegrees(60))); // VERY FAR SHOT
-        m_driverController.x().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
-        m_driverController.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
-        m_driverController.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
+        m_driverControllerTurret.y().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 4500, Rotation2d.fromDegrees(60))); // VERY FAR SHOT
+        m_driverControllerTurret.x().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
+        m_driverControllerTurret.b().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 3500, Rotation2d.fromDegrees(55))); // Normal far lob shot
+        m_driverControllerTurret.a().onTrue(new Shoot(m_shooter, m_hood, m_transfer, 1750, Rotation2d.fromDegrees(45))); // Close shot
 
-        m_driverController.povLeft().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
-        m_driverController.povRight().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
+        m_driverControllerTurret.povLeft().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(22.5)));
+        m_driverControllerTurret.povRight().onTrue(new RotateTurret(m_turret, Rotation2d.fromDegrees(-22.5)));
     }
     
     public Command getDriveCommand() {

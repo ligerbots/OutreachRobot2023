@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import java.util.function.DoubleSupplier;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
@@ -18,6 +19,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -53,8 +55,12 @@ public class Turret extends SubsystemBase {
 
   private final SparkClosedLoopController m_controller;
 
+  private final DoubleSupplier m_goalSupplier;
+
+  private final SlewRateLimiter m_goalSlewRateLimiter = new SlewRateLimiter(0.25); // limit how fast the goal can change
+
   /** Creates a new Turret. */
-  public Turret() {
+  public Turret(DoubleSupplier goalSupplier) {
     m_turretMotor = new SparkMax(Constants.TURRET_MOTOR_CAN_ID, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
     config.inverted(false);
@@ -78,10 +84,14 @@ public class Turret extends SubsystemBase {
 
     m_turretMotor.getEncoder().setPosition(0);
     // SmartDashboard.putNumber("turret/testAngle", 0);
+
+    m_goalSupplier = goalSupplier;
   }
 
   @Override
   public void periodic() {
+    setAngle(Rotation2d.fromDegrees(m_goalSlewRateLimiter.calculate(m_goalSupplier.getAsDouble())));
+
     // This method will be called once per scheduler run
     // m_goal = Rotation2d.fromDegrees(SmartDashboard.getNumber("turret/testAngle", 0));
     m_goalClipped = limitAngle(m_goal);
