@@ -44,8 +44,8 @@ public class Turret extends SubsystemBase {
 
   private SparkMax m_turretMotor;
 
-  private static final double MIN_ANGLE_DEG = -45.0; //Note: This can be -45 at max. We are using 10 as it may not be setup correctly
-  private static final double MAX_ANGLE_DEG = 45.0; //Note: This can be 45 at max. We are using 10 as it may not be setup correctly
+  private static final double MIN_ANGLE_DEG = -95.0; //Note: This can be -45 at max. We are using 10 as it may not be setup correctly
+  private static final double MAX_ANGLE_DEG = 95.0; //Note: This can be 45 at max. We are using 10 as it may not be setup correctly
 
   private static final double K_P = 15.0;
   private static final double K_I = 0.0;
